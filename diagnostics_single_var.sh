@@ -1,13 +1,11 @@
-#!/bin/sh -l
-
-. ~/.bashrc
-. $DIR_UTIL/descr_CPS.sh
-. $DIR_UTIL/descr_ensemble.sh 1993
-. $DIR_UTIL/load_cdo
-
+#!/bin/sh -l 
+. ~/.bashrc 
+. $DIR_UTIL/descr_CPS.sh 
+. $DIR_UTIL/descr_ensemble.sh 1993 
+. $DIR_UTIL/load_cdo 
 set -eux  
-#
-export lasty=${1}
+# 
+export lasty=${1} 
 # select if you compare to model or obs 
 export cmp2obs=${2}
 export pltype=${3}
@@ -21,11 +19,14 @@ esac
 export do_timeseries=${6}
 export do_atm=${7}
 export do_lnd=${8}
-export do_ice=${9}
+
 dirdiag=${10}
 nmaxens=${11}
 export st=${12}
 export cmp2obs=${13}
+export do_anncyc=${14}
+do_2d_plt=${15}
+#fi
 # END SECTION TO BE MODIFIED BY USER
 
 mkdir -p $dirdiag
@@ -55,7 +56,7 @@ then
    dir_obs4=/work/csp/as34319/obs/ERA5
    dir_obs5=/work/csp/as34319/obs/
 fi
-export climobs=1993-201r68
+export climobs=1993-2016
 export iniclim=$startyear
 
 #
@@ -89,9 +90,8 @@ fi
     # time-series zonal plot (3+5)
  
     ## NAMELISTS
-pltdir=$dirdiag/plots
+pltdir=$dirdiag/plots/bias
 mkdir -p $pltdir
-mkdir -p $pltdir/atm $pltdir/lnd $pltdir/ice $pltdir/ocn $pltdir/namelists
 
 export units
 export title
@@ -138,7 +138,7 @@ export varmod=$var
 units=""
 export units_from_here=0
 export name_from_here=0
-#if [[ ! -f $dirdiag/${expid1}.$realm.$varmod.$startyear-${lasty}.ymean.nc ]]
+#if [[ ! -f $dirdiag/${SPSSystem}.$realm.$varmod.$startyear-${lasty}.ymean.nc ]]
 #then
 #            continue
 #fi
@@ -180,7 +180,7 @@ case $varmod in
    T850)varobs=T2M;cf=-273.15;units="Celsius deg";obsfile="$dir_obs1";title2="ERA5 $climobs";export maxplot=36;export minplot=-20;delta=4;units_from_here=1;export cmp2obs_ncl=0;;
    TREFMNAV)varobs=T2M;cf=-273.15;units="Celsius deg";obsfile="$dir_obs1";title2="ERA5 $climobs";export maxplot=36;export minplot=-20;delta=4;units_from_here=1;export cmp2obs_ncl=0;;
    TREFMXAV)varobs=T2M;cf=-273.15;units="Celsius deg";obsfile="$dir_obs1/ERA5_1m_clim_1deg_1979-2018_surface.nc";title2="ERA5 $climobs";export maxplot=36;export minplot=-20;delta=4;units_from_here=1;export cmp2obs_ncl=0;;
-   TREFHT)varobs=T2M;cf=-273.15;units="Celsius deg";obsfile="$dir_obs1/t2m_ERA5_1m_clim_1993-2016.nc";title2="ERA5 $climobs";export maxplot=36;export minplot=-20;delta=4;units_from_here=1;export cmp2obs_ncl=$cmp2obs;;
+   TREFHT)varobs=var167;cf=-273.15;units="Celsius deg";obsfile="$dir_obs1/t2m_ERA5_1m_clim_1993-2016.nc";title2="ERA5 $climobs";export maxplot=36;export minplot=-20;delta=4;units_from_here=1;export cmp2obs_ncl=$cmp2obs;;
    U010)varobs=var131;units="m/s";obsfile="$dir_obs4/uplev_era5_1979-2018_anncyc.nc";ncl_lev=1;title2="ERA5 $climobs";export maxplot=30.;export minplot=-30.;delta=10.;units_from_here=1;export maxplotdiff=10;export minplotdiff=-10;deltadiff=2.;cmp2obs_anncyc=1;export cmp2obs_ncl=$cmp2obs;;
    U100)varobs=var131;units="m/s";obsfile="$dir_obs4/uplev_era5_1979-2018_anncyc.nc";ncl_lev=2;title2="ERA5 $climobs";export maxplot=30.;export minplot=-30.;delta=10.;units_from_here=1;export maxplotdiff=10;export minplotdiff=-10;deltadiff=2.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;;
    U200)varobs=U;units="m/s";obsfile="$dir_obs1/ERA5_1m_clim_1deg_1979-2018_prlev.nc";ncl_lev=1;title2="ERA5 $climobs";export maxplot=30.;export minplot=-30.;delta=10.;units_from_here=1;export maxplotdiff=10;export minplotdiff=-10;deltadiff=2.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;;
@@ -193,7 +193,7 @@ case $varmod in
    TS)varobs=var235;cf=-273.15;units="Celsius deg";obsfile="$dir_obs1/sst_HadISST_1m_clim_1993-2016.nc";export title2="ERA5 $climobs";export maxplot=36;export minplot=-20;delta=4;units_from_here=1;export cmp2obs_ncl=$cmp2obs;;
    PRECT)varobs=precip;mf=86400000;units="mm/d";export maxplot=18;export minplot=2;delta=2.;export maxplotdiff=5.;export minplotdiff=-5.;deltadiff=1.;obsfile="$dir_obs1/precip_GPCP_1m_clim_1993-2016.nc";export title2="GPCP $climobs";title="Total precipitation";units_from_here=1;name_from_here=1;export cmp2obs_ncl=$cmp2obs;;
    PRECC)varobs=var167;mf=86400000;units="mm/d";export maxplot=18;export minplot=2;delta=2.;title="Convective precipitation";units_from_here=1;name_from_here=1;cmp2obs_ncl=0;cmp2obs_anncyc=0;;
-   PSL)varobs=MSL;mf=0.01;units="hPa";export maxplot=1030;export minplot=990;delta=4.;export maxplotdiff=8;export minplotdiff=-8;deltadiff=2.;obsfile="$dir_obs1/mslp_ERA5_1m_clim_1993-2016.nc";export cmp2obs_ncl=$cmp2obs;;
+   PSL)varobs=var151;mf=0.01;units="hPa";export maxplot=1030;export minplot=990;delta=4.;export maxplotdiff=8;export minplotdiff=-8;deltadiff=2.;obsfile="$dir_obs1/mslp_ERA5_1m_clim_1993-2016.nc";export cmp2obs_ncl=$cmp2obs;;
    QFLX)varobs=var167;mf=1000000;units="10^-6 kgm-2s-1";export maxplot=100.;export minplot=0.;delta=10.;title="Surface Water Flux";units_from_here=1;name_from_here=1;cmp2obs_ncl=0;export maxplotdiff=10.;export minplotdiff=-10.;deltadiff=1.;;
    SOLIN)varobs=var167;units="W/m2";export maxplot=450;export minplot=60;delta=30.;title="Insolation";units_from_here=1;name_from_here=1;cmp2obs_ncl=0;cmp2obs_anncyc=0;axplotdiff=0.00005;export minplotdiff=-0.00005;deltadiff=.00001;;
    FLDS)varobs=var175;export maxplot=400;export minplot=100;delta=50.;name_from_here=1;title="Down lw surface";export maxplotdiff=20;export minplotdiff=-20;deltadiff=5.;obsfile="$dir_obs3/strd_era5_1980-2019_mm_ann_cyc.nc";export title2="ERA5 $climobs";export cmp2obs_ncl=$cmp2obs;;
@@ -215,8 +215,7 @@ case $varmod in
    *)title="";delta=0.;name_from_here=0;cmp2obs_anncyc=0;export cmp2obs_ncl=0;;
 esac
 #            export taxis="$varmod $units"
-comppltdir=$dirdiag/plots/
-mkdir -p $comppltdir
+mkdir -p $pltdir
    # now 2d maps
 if [[ $do_2d_plt -eq 1 ]]
 then
@@ -230,7 +229,7 @@ then
       for ftype in $typelist
       do
          echo "---now plotting 2d $varmod"
-         export inpfile=$dirdiag/$varmod/CLIM/${realm}.$ftype.$st.$varmod.$startyear-${lasty}.$nmaxens.nc
+         export inpfile=$dirdiag/$varmod/CLIM/${realm}.$ftype.$st.$varmod.clim.$startyear-${lasty}.$nmaxens.nc
          if [[ ! -f $inpfile ]]
          then
             continue
@@ -243,7 +242,7 @@ then
          mkdir -p $SCRATCHDIR/tmp/scripts/
          for lead in 0 1 2 3
          do
-            export pltname=$comppltdir/$varmod.$st.map_l${lead}.$startyear-${lasty}.$nmaxens.png
+            export pltname=$pltdir/BIAS.$varmod.$st.map_l${lead}.$startyear-${lasty}.$nmaxens.png
             rsync -auv plot_2d_maps_and_diff.ncl $SCRATCHDIR/tmp/scripts/plot_2d_maps_and_diff.$st.$varmod.ncl
             ncl $SCRATCHDIR/tmp/scripts/plot_2d_maps_and_diff.$st.$varmod.ncl
             if [[ $pltype == "x11" ]]
@@ -256,7 +255,7 @@ then
 fi   # end 2d maps
 if [[ $do_anncyc -eq 1 ]]
 then
-   export inpfile=$dirdiag/${expid1}.$realm.$varmod.$iniclim-$lasty.anncyc.nc
+   export inpfile=$dirdiag/${SPSSystem}.$realm.$varmod.$iniclim-$lasty.anncyc.nc
    list_reg_anncyc="Global NH SH"
    if [[ $varmod == "U010" ]]
    then
@@ -287,7 +286,7 @@ then
    done
    export rootinpfileobs=$dirdiag/`basename $obsfile|rev|cut -d '.' -f2-|rev` 
    export inpfileanncyc=$dirdiag/`basename $inpfile|rev|cut -d '.' -f2-|rev` 
-   export pltname=$comppltdir/${expid1}.$comp.$varmod.$startyear_anncyc-$lasty.anncyc_3.png
+   export pltname=$pltdir/${SPSSystem}.$comp.$varmod.$startyear_anncyc-$lasty.anncyc_3.png
    rsync -auv plot_anncyc.ncl $dirdiag/scripts/plot_anncyc.$varmod.ncl
    ncl $dirdiag/scripts/plot_anncyc.$varmod.ncl
    if [[ $pltype == "x11" ]]
@@ -326,7 +325,7 @@ then
    done
    export rootinpfileobs=$dirdiag/`basename $obsfile|rev|cut -d '.' -f2-|rev`
    export inpfileanncyc=$dirdiag/`basename $inpfile|rev|cut -d '.' -f2-|rev`
-   export pltname=$comppltdir/${expid1}.$comp.$varmod.$startyear_anncyc-$lasty.anncyc_5.png
+   export pltname=$pltdir/${SPSSystem}.$comp.$varmod.$startyear_anncyc-$lasty.anncyc_5.png
    ncl $dirdiag/scripts/plot_anncyc.$varmod.ncl
    if [[ $pltype == "x11" ]]
    then
@@ -339,13 +338,13 @@ then
    then
       for sea in JJA DJF ANN
       do
-         export inpfileznl=$dirdiag/${expid1}.$comp.$varmod.$startyear-${lasty}.znl.$sea.nc
+         export inpfileznl=$dirdiag/${SPSSystem}.$comp.$varmod.$startyear-${lasty}.znl.$sea.nc
          if [[ ! -f $inpfileznl ]]
          then
-            inpfileznl=$dirdiag/${expid1}.$comp.$varmod.$startyear-${lasty}.znlmean.$sea.nc
+            inpfileznl=$dirdiag/${SPSSystem}.$comp.$varmod.$startyear-${lasty}.znlmean.$sea.nc
             if [[ ! -f $inpfileznl ]]
             then
-               anncycfile=$dirdiag/${expid1}.$realm.$varmod.$startyear-$lasy.anncyc.nc 
+               anncycfile=$dirdiag/${SPSSystem}.$realm.$varmod.$startyear-$lasy.anncyc.nc 
                if [[ $sea != "ANN" ]]
                then
                   cdo timmean -selseason,$sea -zonmean $anncycfile $inpfileznl
@@ -380,16 +379,16 @@ then
       # snow over Syberia
       for sea in JJA DJF ANN
       do
-         export inpfileznl=$dirdiag/${expid1}.$comp.$varmod.$startyear-${lasty}.znl.$sea.nc
+         export inpfileznl=$dirdiag/${SPSSystem}.$comp.$varmod.$startyear-${lasty}.znl.$sea.nc
          if [[ ! -f $inpfileznl ]]
          then
             listafznl=""
             for yyyy in `seq -f "%04g" $startyear $finalyear`
             do
-               inpfileznlyyyy=$dirdiag/${expid1}.$comp.$varmod.$startyear-${lasty}.znl.$sea.nc
+               inpfileznlyyyy=$dirdiag/${SPSSystem}.$comp.$varmod.$startyear-${lasty}.znl.$sea.nc
                if [[ ! -f $inpfileznlyyyy ]]
                then
-                  cdo selseason,$sea -zonmean -sellonlatbox,90,140,0,90 $dirdiag/${expid1}.$realm.$varmod.$yyyy.nc $inpfileznlyyyy
+                  cdo selseason,$sea -zonmean -sellonlatbox,90,140,0,90 $dirdiag/${SPSSystem}.$realm.$varmod.$yyyy.nc $inpfileznlyyyy
                fi
                listafznl+=" $inpfileznlyyyy"
             done

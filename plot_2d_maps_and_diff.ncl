@@ -264,7 +264,8 @@ begin
      res@cnLevelSpacingF      =  1.0            ; set contour spacing
 
      delete(res@cnFillPalette)
-     cmap1 = read_colormap_file("hotcold_18lev")
+;     cmap1 = read_colormap_file("hotcold_18lev")
+     cmap1 = read_colormap_file("blueyellowred.rgb")
      res@cnFillPalette     = cmap1
      if(varmod.eq."TREFHT".or.varmod.eq."TS".or.varmod.eq."TREFMNAV")then
         res@cnLevelSelectionMode="ExplicitLevels"

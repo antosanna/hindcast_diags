@@ -12,10 +12,12 @@ debug=0
 nmaxens=$1
 var=$2
 st=$3
+dirdiag=$4
 echo 'NOW MAX ENSEMBLE SET TO '$nmaxens
          
-mkdir -p $dirdiag/$var
-cd $dirdiag/$var
+dirdiagvar=$dirdiag/$var
+mkdir -p $dirdiagvar
+cd $dirdiagvar
 #for yyyy in `seq $iniy_hind $endy_hind`
 lasty=1999
 for yyyy in `seq $iniy_hind $lasty`
@@ -35,12 +37,12 @@ do
 								continue
 					fi
 # do the monthly mean
-					filevarmonmean=$dirdiag/$var/$caso.cam.$ftype.$var.$yyyy$st.monmean.nc
+					filevarmonmean=$dirdiagvar/$caso.cam.$ftype.$var.$yyyy$st.monmean.nc
 					if [[ ! -f $filevarmonmean ]]
 					then 
 # extract single var
-					   filevar=$dirdiag/$var/$caso.cam.$ftype.$var.$yyyy-$st-01-00000.nc
-					   filevartime=$dirdiag/$var/$caso.cam.$ftype.$var.$yyyy-$st-01-00000.nc
+					   filevar=$dirdiagvar/$caso.cam.$ftype.$var.$yyyy-$st-01-00000.nc
+					   filevartime=$dirdiagvar/$caso.cam.$ftype.$var.$yyyy-$st-01-00000.nc
 								cdo selvar,$var $inpfile $filevar
 # exclude first output timestep (IC)
 								ncks -O -F -d time,2, $filevar $filevartime
@@ -52,7 +54,7 @@ do
 								nens=$(($nens + 1))
 								if [[ $nens -eq $nmaxens ]]
 								then
-											yfilevarensmean=$dirdiag/$var/cam.$ftype.$var.$yyyy$st.ensmean.$nmaxens.nc
+											yfilevarensmean=$dirdiagvar/cam.$ftype.$var.$yyyy$st.ensmean.$nmaxens.nc
 											if [[ ! -f $yfilevarensmean ]]
 											then
 														cdo ensmean $inpfilelist $yfilevarensmean
@@ -62,18 +64,18 @@ do
 								fi
 					done #loop on ens
 done #loop on years
-mkdir -p $dirdiag/$var/CLIM
-hindclimfile=$dirdiag/$var/CLIM/cam.$ftype.$st.$var.clim.$iniy_hind-$lasty.$nmaxens.nc
+mkdir -p $dirdiagvar/CLIM
+hindclimfile=$dirdiagvar/CLIM/cam.$ftype.$st.$var.clim.$iniy_hind-$lasty.$nmaxens.nc
 list4hindclim=""
 if [[ ! -f $hindclimfile ]]
 then
    for yyyy in `seq $iniy_hind $lasty`
    do
-      list4hindclim+=" $dirdiag/$var/cam.$ftype.$var.$yyyy$st.ensmean.$nmaxens.nc"
+      list4hindclim+=" $dirdiagvar/cam.$ftype.$var.$yyyy$st.ensmean.$nmaxens.nc"
    done
    cdo -ensmean $list4hindclim $hindclimfile
 fi
-mkdir -p $dirdiag/$var/ANOM
+mkdir -p $dirdiagvar/ANOM
 for yyyy in `seq $iniy_hind $lasty`
 do
    listfull=""
@@ -82,17 +84,17 @@ do
    for ff in $listfull
    do
       caso=`echo $ff|cut -d '.' -f1`
-      cdo sub $ff $hindclimfile $dirdiag/$var/ANOM/$caso.cam.$ftype.$var.monmean.nc
-      listanom+=" $dirdiag/$var/ANOM/$caso.cam.$ftype.$var.monmean.nc"
+      cdo sub $ff $hindclimfile $dirdiagvar/ANOM/$caso.cam.$ftype.$var.monmean.nc
+      listanom+=" $dirdiagvar/ANOM/$caso.cam.$ftype.$var.monmean.nc"
    done
-   if [[ ! -f $dirdiag/$var/ANOM/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc ]]
+   if [[ ! -f $dirdiagvar/ANOM/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc ]]
    then
-      ncecat $listanom $dirdiag/$var/ANOM/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc
-      ncrename -O -d record,ens $dirdiag/$var/ANOM/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc
+      ncecat $listanom $dirdiagvar/ANOM/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc
+      ncrename -O -d record,ens $dirdiagvar/ANOM/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc
    fi
 done
-if [[ ! -f $dirdiag/$var/ANOM/cam.$ftype.$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc ]]
+if [[ ! -f $dirdiagvar/ANOM/cam.$ftype.$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc ]]
 then
-   ncecat  $dirdiag/$var/ANOM/cam.$ftype.????$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc $dirdiag/$var/ANOM/cam.$ftype.$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc
-   ncrename -O -d record,year $dirdiag/$var/ANOM/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc
+   ncecat  $dirdiagvar/ANOM/cam.$ftype.????$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc $dirdiagvar/ANOM/cam.$ftype.$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc
+   ncrename -O -d record,year $dirdiagvar/ANOM/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc
 fi
