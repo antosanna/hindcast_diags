@@ -57,7 +57,8 @@ begin
   delta = 0.001
 
 ;---Left axis tickmarks
-  if(isatt(res2,"tmYLValues")) then
+;  if(isatt(res2,"tmYLValues")) then
+  if(0.eq.1)then
     lft_lat    = get_res_value(res2,"tmYLValues",-1)
     nlat       = dimsizes(lft_lat)
     ylvalues = new(nlat,float)
@@ -258,15 +259,9 @@ begin
 ; open file and read in variable
 ;***********************************************
   write="FALSE"
-  lat1tmp=getenv("lat1")
-  lat1=stringtofloat(lat1tmp)
-  lat2tmp=getenv("lat2")
-  lat2=stringtofloat(lat2tmp)
-  lon1tmp=getenv("lon1")
-  lon1=stringtofloat(lon1tmp)
-  lon2tmp=getenv("lon2")
-  lon2=stringtofloat(lon2tmp)
-  varm=getenv("varmstr")
+  lasty=toint(getenv("lasty"))
+  iniy=toint(getenv("iniy"))
+  varm=getenv("varm")
   varo=getenv("varo")
   leadtime=getenv("leadtime")
   model=getenv("mod")
@@ -276,124 +271,80 @@ begin
   print("infileo "+infileo)
   in2  = addfile(infileo,"r")
 
-  if ( varo.eq."var129" .or. varo.eq."var130" .or. varo.eq."var131" .or. varo.eq."var132" .or. varo.eq."var39") then
-      tmp2 = in2->$varo$(:,:,0,:,:)
-  else
-      if ( varo .eq. "var34" ) then
-         tmp2 = in2->$varo$
-         tmp2@_FillValue=-9999.
-         tmp2@missing_value=-9999.
-         ;tmp2=where(tmp2.lt.-100,tmp2@_FillValue,tmp2)
-      else
-         tmp2 = in2->$varo$(0:23,0:5,:,:)
-      end if
-  end if
+  obs = in2->$varo$(0:lasty-iniy,:,:,:)
+  nn=dimsizes(obs)
+  print(nn)
+  lat = in2->lat
+  lon = in2->lon
 
   infilem=getenv("inputm")
   nrun=getenv("nrun")
   in1  = addfile(infilem,"r")
-  nn=dimsizes(tmp2)
-  print(nn)
-  if ( model .eq. "SPS3" ) then
-     print(infilem)
-     tmp0 = reshape(in1->$varm$,(/24,6,180,360/))
-     printVarSummary(tmp0)
-     tmp1 = tmp0(0:nn(0)-1,:,:,:)
-  else
-     if ( varm.eq."zg" .or. varm.eq."ta" .or. varm.eq."ua" .or. varm.eq."va" ) then 
-         tmp1 = in1->$varm$(0:nn(0)-1,:,0,:,:)
-     else if ( varm .eq. "tso" ) then
-         tmp1 = in1->$varm$(0:nn(0)-1,:,:,:)
-	        tmp1@_FillValue=-9999.
-         tmp1@missing_value=-9999.
-     else
-         tmp1 = in1->$varm$(0:nn(0)-1,:,:,:)
-     end if
-     end if
-  end if
-  lat  = in1->lat
-  lon  = in1->lon
+  print("infilem "+infilem)
+  sps = dim_avg_n(in1->$varm$(0:lasty-iniy,:,:,:,:),1) 
+  latmod  = in1->lat
+  lonmod  = in1->lon
+  lon@units="degrees_east"
+  lat@units="degrees_north"
+  sps_in_obs = linint2_Wrap (lonmod,latmod,sps, True, lon,lat, 0)
 
   print("Ho letto i files")
 
-;---- Flag per scrivere il NetCDF della ACC
-  if ( region .eq. "global" ) then
-     write="TRUE"
-  end if
-  
   nyears=nn(0)
 
-  varobs=new((/nyears,nn(2),nn(3)/),double)
-  varmod=new((/nyears,nn(2),nn(3)/),double)
+  varobs=new((/nyears,nn(2),nn(3)/),float)
+  varmod=new((/nyears,nn(2),nn(3)/),float)
   print("Adesso seleziono i time corrispondenti alla lead season")
 
   lead=toint(leadtime)
   t1=lead
   t2=lead+2
 
-  varobs=dim_avg_n_Wrap(tmp2(:,t1:t2,:,:),1)
-  varmod=dim_avg_n_Wrap(tmp1(:,t1:t2,:,:),1)
-  copy_VarMeta(varobs,varmod)
+  varobs=dim_avg_n_Wrap(obs(:,t1:t2,:,:),1)
+  varobs!0="year"
+  varobs!1="lat"
+  varobs!2="lon"
+  varmod=dim_avg_n_Wrap(sps_in_obs(:,t1:t2,:,:),1)
+  varmod!0="year"
+  varmod!1="lat"
+  varmod!2="lon"
 
-  copy_VarMeta(tmp2(:,0,:,:),varobs)
-  copy_VarMeta(tmp1(:,0,:,:),varmod)
-  varobs3d=reshape(varobs,(/nyears,nn(2),nn(3)/))
-  varmod3d=reshape(varmod,(/nyears,nn(2),nn(3)/))
-  copy_VarMeta(tmp2(:,0,:,:),varobs3d)
-  copy_VarMeta(tmp2(:,0,:,:),varmod3d)
-  ;if ( varo .eq. "var34" ) then
-  ;    varobs3d@_FillValue=-9999.
-  ;    varobs3d@missing_value=-9999.
-  ;    varmod3d@_FillValue=-9999.
-  ;    varmod3d@missing_value=-9999.
-  ;end if
-  printVarSummary(varobs3d)
-  printVarSummary(varmod3d)
-;************************************************
-; reorder to get time as right most dimension
-;***********************************************
-  ts1 = varmod3d(lat|:,lon|:,year|:)
-  ts2 = varobs3d(lat|:,lon|:,year|:)
-  print("Ho riordinato le dimensioni delle variabili")
 ;************************************************
 ; Calculate coslat
 ;***********************************************
 rad    = 4.0*atan(1.0)/180.0
-clat   = cos(lat({lat1:lat2})*rad)
+clat   = cos(lat*rad)
 ;************************************************
 ; reorder to get time as right most dimension
 ;***********************************************
-if ( varo .eq. "var34" ) then
-	opt=0
-else
-	opt=1
-end if
-tstoacc1 = wgt_areaave_Wrap(varmod3d(:,{lat1:lat2},{lon1:lon2}),clat,1.0,opt)
-tstoacc2 = wgt_areaave_Wrap(varobs3d(:,{lat1:lat2},{lon1:lon2}),clat,1.0,opt)
-print("Ho riordinato le dimensioni delle variabili")
-print(tstoacc1)
-print(tstoacc2)
+opt=1
+;tstoacc1 = wgt_areaave_Wrap(varmod,clat,1.0,opt)
+;tstoacc2 = wgt_areaave_Wrap(varobs,clat,1.0,opt)
+;print("Ho riordinato le dimensioni delle variabili")
+;print(tstoacc1)
+;print(tstoacc2)
 ;************************************************
 ; calculate cross correlations
 ;************************************************
+
+;  pcorr=escorc(tstoacc1(lat|:,lon|:,year|:),tstoacc2(lat|:,lon|:,year|:))
+;  print(pcorr)
+  
   maxlag = 0                                    ; set lag
 ; note, the max lag should not be more than N/4
-
-  pcorr=escorc(tstoacc1,tstoacc2)
-  print(pcorr)
-  
-  acc = esccr(ts1,ts2,maxlag)                   ; calc cross correlations
-  printVarSummary(acc)
+  acc = esccr(varmod(lat|:,lon|:,year|:),varobs(lat|:,lon|:,year|:),maxlag)                   ; calc cross correlations
   acct2m=acc(:,:,0)
-  copy_VarMeta(ts1(:,:,0),acct2m)
+  copy_VarMeta(obs(0,0,:,:),acct2m)
   printVarSummary(acct2m)
+  acct2m&lon=lon
+  acct2m&lat=lat
   acct2m@_FillValue=-9999
-  accareamean=wgt_areaave(acct2m({lat1:lat2},{lon1:lon2}), clat, 1.0, 0)
+  accareamean=wgt_areaave(acct2m, clat, 1.0, 0)
   print(accareamean)
   print("Ho calcolato ACC")
 
 ; copy meta data and coordinate variables using contributed functions
-  copy_VarMeta(ts1(:,:,0), acct2m)        
+  copy_VarMeta(varmod(0,:,:), acct2m)        
   acct2m@_FillValue=-9999
   printVarSummary(acct2m)
   print("Ho copiato il metadato")
@@ -402,33 +353,33 @@ print(tstoacc2)
 ; plot the correlations
 ;************************************************
   dirplots=getenv("dirplots")
-  wks_type = "png"
+  wks_type=getenv("pltype") ;"png"
   iyy=getenv("iniy")
   fyy=getenv("endy")
   st=getenv("st")
   var=getenv("var")
   nrun=getenv("nrun")
-  titreg=getenv("titreg")
   plname=getenv("plname")  ;dirplots+"/"+model+"_ACC_"+region+"_"+var+"_"+st+"_l"+leadtime
+  plname="plot_test" ;dirplots+"/"+model+"_ACC_"+region+"_"+var+"_"+st+"_l"+leadtime
+;  cmap2 = read_colormap_file("nrl_sirkes")
   wks = gsn_open_wks(wks_type,plname)
-  gsn_define_colormap(wks,"test_acc")              ; choose colormap
+;  gsn_define_colormap(wks,"test_acc")              ; choose colormap
+  gsn_define_colormap(wks,"blueyellowred")              ; choose colormap
   plot = new(1,graphic)
 
 ; ------ PLOT SETTINGS ------
  
 res2                      = True                ; make plot mods
 
-res2@gsnDraw                 = False               ; don't draw
-res2@gsnFrame                = False        ; don't advance frame
+;res2@gsnDraw                 = False               ; don't draw
+;res2@gsnFrame                = False        ; don't advance frame
 res2@cnLinesOn               = False
-res2@gsnSpreadColors         = False               ; use full colormap
+res2@gsnSpreadColors         = True               ; use full colormap
 res2@gsnMaximize             = True
 res2@mpGeophysicalLineThicknessF = 3
 res2@gsnAddCyclic         = True
+;res2@cnFillPalette     = cmap2(::-1,:)
 
-if ( region .eq. "global" ) then
-   res2@gsnDraw             = False
-   res2@gsnFrame            = False
    res2@gsnMaximize         = True
    res2@mpCenterLonF         = 0
 
@@ -448,82 +399,9 @@ if ( region .eq. "global" ) then
    res2@pmTickMarkDisplayMode = "Always"
    res2@mpGridLatSpacingF        = 30
    res2@mpGridLonSpacingF        = 30
-else if ( region .eq. "NH" ) then
-   res2@mpFillOn             = False
-   res2@gsnMaximize          = False
-   res2@gsnPolar             = "NH"
-   res2@pmLabelBarWidthF     = 0.3               ; default is shorter
-   res2@pmLabelBarHeightF    = 0.05               ; default is taller
-   res2@vpWidthF             = 0.35
-   res2@vpHeightF            = 0.35
-else if ( region .eq. "SH" ) then
-   res2@mpFillOn             = False
-   res2@gsnMaximize          = False
-   res2@gsnPolar             = "SH"
-   res2@pmLabelBarWidthF     = 0.3               ; default is shorter
-   res2@pmLabelBarHeightF    = 0.05               ; default is taller
-   res2@vpWidthF             = 0.35
-   res2@vpHeightF            = 0.35
-else if ( region .eq. "Europe" )
-   res2@mpProjection = "LambertConformal"
-   res2@mpDataBaseVersion = "MediumRes"
-   res2@mpGridAndLimbOn        = True
-   res2@mpGridAndLimbDrawOrder = "PostDraw"
-   res2@mpGridLineDashPattern  = 2
-   res2@mpFillOn             = False
-   res2@mpLimitMode           = "Corners"
-   res2@mpLeftCornerLatF      = 22.5 ;25
-   res2@mpLeftCornerLonF      = -15 
-   res2@mpRightCornerLatF     = 57.5
-   res2@mpRightCornerLonF     = 80
-  
-   res2@mpLambertMeridianF   = 15
-   res2@mpLambertParallel1F    = 30
-   res2@mpLambertParallel2F    = 80
-   
-   res2@gsnPaperOrientation  = "landscape"
-   res2@gsnMaximize          = True
-   res2@tmXBLabelFontHeightF = 0.008
-   res2@tmYLLabelFontHeightF = 0.008
-   res2@pmLabelBarWidthF     = 0.3               ; default is shorter
-   res2@pmLabelBarHeightF    = 0.05               ; default is taller
-   res2@pmLabelBarOrthogonalPosF = .10
-   res2@pmTickMarkDisplayMode = "Always"
-   res2@mpShapeMode          = "FreeAspect"
-   res2@vpWidthF             = 0.35
-   res2@vpHeightF            = 0.25
-   res2@mpGridLatSpacingF        = 15
-   res2@mpGridLonSpacingF        = 15
-else
-   res2@mpFillOn             = False
-   res2@mpCenterLonF=0.  ;getenv("lon0")
-   res2@mpCenterLatF=0.  ;getenv("lat0")
-   res2@mpLimitMode          = "LatLon"
-   res2@gsnPaperOrientation  = "landscape"
-   res2@gsnMaximize          = True
-   res2@tmXBLabelFontHeightF = 0.008
-   res2@tmYLLabelFontHeightF = 0.008
-   res2@pmLabelBarWidthF     = 0.3               ; default is shorter
-   res2@pmLabelBarHeightF    = 0.05               ; default is taller
-   res2@pmLabelBarOrthogonalPosF = .40
-   res2@pmTickMarkDisplayMode = "Always"
-   res2@mpShapeMode          = "FreeAspect"
-   res2@vpWidthF             = 0.5
-   res2@vpHeightF            = 0.06
-end if
-end if
-end if
-end if
 res2@cnLabelMasking           = True
 
-if (region .eq. "Tropics") then
-    res2@mpGridAndLimbOn          = False                ; turn on lat/lon lines
-end if
 
-res2@mpMinLatF                = lat1
-res2@mpMaxLatF                = lat2
-res2@mpMinLonF                = lon1
-res2@mpMaxLonF                = lon2
 
 
 res2@cnMissingValFillColor   = -1
@@ -537,91 +415,25 @@ res2@gsnCenterStringOrthogonalPosF = 0.1
 ; ------ END PLOT SETTINGS ------
 ;
 ;
-  res2@cnLevelSelectionMode = "ExplicitLevels"                           ; set explicit contour levels
-  res2@cnLevels    = (/-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9/)   
-  res2@cnFillColors = (/80,96,112,122,74,58,42,26,10,5,0,166,164,162,159,150,141,137,131,123/)
+;  res2@cnLevelSelectionMode = "ExplicitLevels"                           ; set explicit contour levels
+;  res2@cnLevels    = (/-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9/)   
+;  res2@cnFillColors = (/80,96,112,122,74,58,42,26,10,5,0,166,164,162,159,150,141,137,131,123/)
   res2@cnFillOn    = True                                                ; turn on color fill
   res2@cnLinesOn   = False                                               ; turn off the contour lines
-
-  lag = 0
 
   month=getenv("mon")
   res2@tiMainString         = month+" start-date - lead season "+leadtime
   res2@tiMainOffsetYF    = 0.0001
-  if ((region .eq. "NH") .or. (region .eq. "SH") ) then
-     res2@tiMainFontHeightF = 0.015
-  else
      res2@tiMainFontHeightF = 0.015	
-  end if
 
   res2@gsnLeftString = "ACC= "+sprintf("%3.2f",accareamean)
   res2@gsnLeftStringFontHeightF = 0.01
   res2@gsnLeftStringOrthogonalPosF = 0.1
 
-  if ( region .eq. "Tropics" ) then
-     res2@gsnLeftStringFontHeightF = 0.009
-     res2@gsnLeftStringOrthogonalPosF = 0.3
-  end if
   print("Faccio il plot")
-  if ((region .eq. "NH") .or. (region .eq. "SH") ) then
-     res2@gsnLeftStringFontHeightF = 0.01
-     plot(0) = gsn_csm_contour_map_polar(wks,acct2m(::-1,:),res2)
-  else
-     plot(0) = gsn_csm_contour_map(wks,acct2m(::-1,:),res2)
-  end if
+  plot = gsn_csm_contour_map(wks,acct2m,res2)
+  print("plot done "+plname)
 ;************************************************
-  tmres    = True
-
-;---Set the values you want for the map tickmarks.
-  tmres@tmXBLabelFontHeightF = 0.009         ; Default is a bit large
-  if (region .eq. "global" ) then
-
-;---We're putting tickmarks on all four axes.
-      tmres@tmYLValues = ispan(-90,90,30)
-      tmres@tmYRValues = ispan(-90,90,30)
-      tmres@tmXBValues = ispan(-180,180,30)
-      tmres@tmXTValues = ispan(-180,180,30)
-      map = add_map_tickmarks2(wks,plot,tmres) 
-
-   else if (region .eq. "Europe" ) then
-
-     ;---We're putting tickmarks on all four axes.
-      tmres@tmYLValues = ispan(-90,90,15)
-      tmres@tmYRValues = ispan(-90,90,15)
-      tmres@tmXBValues = ispan(-180,180,15)
-      tmres@tmXTValues = ispan(-180,180,15)
-      map = add_map_tickmarks2(wks,plot,tmres) 	
-
-   else if ( region .eq. "Tropics" ) then
-
-     ;---We're putting tickmarks on all four axes.
-      tmres@tmYLValues = ispan(-20,20,10)
-      tmres@tmYRValues = ispan(-20,20,10)
-      tmres@tmXBValues = ispan(-180,180,30)
-      tmres@tmXTValues = ispan(-180,180,30)
-      map = add_map_tickmarks2(wks,plot,tmres)
- 
-   end if   
-   end if   
-   end if
-
-  resP                     = True                ; modify the panel plot
-  if ( region .eq. "Tropics" ) then
-     resP@mpShapeMode  = "FreeAspect"
-     resP@vpWidthF      = 0.8 
-     resP@vpHeightF     = 0.2 
-  end if
-  resP@gsnFrame             = False               ; don't advance frame
-  resP@txString            = model+": ACC "+titreg+" "+var+" ("+iyy+"-"+fyy+") - members "+nrun
-  if ( region .eq. "Tropics" .or. region .eq. "Europe" ) then
-    resP@lbLabelFontHeightF  = 0.015               ; make labels smaller
-  else
-    resP@lbLabelFontHeightF  = 0.007               ; make labels smaller
-  end if
-  gsn_panel(wks,plot,(/1,1/),resP)
-
-;************************************************
-  frame(wks)
 ;************************************************
 ; write MSSS in a file if global
 ;************************************************
@@ -633,8 +445,8 @@ if (write .eq. "TRUE") then
    filo = "SPS3_ACC_"+var+"_"+st+"_l"+leadtime+".nc"  ; Output file
    finalfile=diro+filo
    print(finalfile)
-   system("/bin/rm -f " + diro + filo)    ; remove if exists
-   fout  = addfile( finalfile, "c")  ; open output file
+  system("/bin/rm -f pippo.nc")    ; remove if exists
+   fout  = addfile( "pippo.nc", "c")  ; open output file
 
    setfileoption(fout,"DefineMode",True)
 

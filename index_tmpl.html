@@ -168,15 +168,7 @@ var clim="DUMMYCLIM";
 
 
 
-var BIAS=[biaslist];
-
-
-var LND=[lndlist];
-
-var ICE=[icelist];
-
-var OCN=[ocnlist];
-
+var diags=["BIAS","ACC"];
 
 
 
@@ -208,14 +200,7 @@ function showdata(vv,vl) {
 
     /* set list of variables to plot */
 
-    if ( vv == "BIAS") { vl = "BIAS"; var list=BIAS};
-
-    if ( vv == "CLM") { var list = LND; vl = "lnd"};
-
-    if ( vv == "CICE") { var list = ICE; vl = "ice"};
-
-    if ( vv == "NEMO") { var list = OCN; vl = "ocn"};
-
+    var list = diags
 
 
     var pic = ""
@@ -225,38 +210,6 @@ function showdata(vv,vl) {
     var Header='';
 
 
-    var AC='<h2 style="background-color:#DDDDDD;"> '+vv+' - BIAS '+'</h2> <div class=box>';
-
-    /* annual cycles */
-
-    /* var tsn=["3","5","2"]; var tsl=["GLOBAL","ZONAL","OCEAN/LAND"];*/
-    var tsn=["3","5"]; var tsl=["GLOBAL","REGIONAL"];
-
-
-    var k = 0 ;
-
-    for (var i = 0; i < list.length; i++) {
-
-/*        if ( list[i] == "ICEFRAC") { var tsn=["3","5"]; var tsl=["GLOBAL","ZONAL"]} else { var tsn=["3","5","2"]; var tsl=["GLOBAL","ZONAL","OCEAN/LAND"]};*/
-        AC+='<div class=box> <h3 style="background-color:#f0f0f0;"> '+list[i]+' </h3>';
-
-        for ( var k = 0; k < tsn.length; k++) {
-
-           pic = expid+'.'+vl+'.'+list[i]+'.'+clim+'.anncyc_'+tsn[k]+'.png';
-
-           AC+='<div class=box> <a href="'+vl+'/'+pic+'"> <img class=pics src="'+vl+'/'+pic+'"/> </a>';
-
-           AC+='<p> <a href="'+vl+'/'+pic+'">'+tsl[k]+'</a> </p> </div>';
-
-        }
-
-        AC+='</div>';
-
-    }
-
-    AC+='</div> </div>';
-
-    AC+='<div class=after-box> </div>';
 
     var TS='<h2 style="background-color:#DDDDDD;"> '+vv+' - TIMESERIES '+'</h2> <div class=box>';
 
@@ -297,7 +250,6 @@ function showdata(vv,vl) {
 
     var Maps='';
 
-<!--    if ( vv == "CAM") { list = list.concat(ATM3) };-->
 
     /* Maps */
 
@@ -368,7 +320,7 @@ function showdata(vv,vl) {
 
     var ZN='';
 
-    if ( vv == "CAM") { list = ATMzonal } else {list = "" };
+    if ( vv == "07") { list = ATMzonal } else {list = "" };
 
     /* ZN */
 
@@ -406,7 +358,7 @@ function showdata(vv,vl) {
   
     var QBO='';
 
-    if ( vv == "CAM") { list = "U" };
+    if ( vv == "07") { list = "U" };
 
 
     QBO+='<h2 style="background-color:#DDDDDD;"> U - QBO '+'</h2> <div class=box>'
@@ -438,7 +390,7 @@ function showdata(vv,vl) {
     QBO+='<div class=after-box> </div>';
 
 
-    if ( vv == "CAM") { document.getElementById("listframe").innerHTML=Header + TS + AC + Maps + ZN+QBO} else if ( vv == "NEMO") { document.getElementById("listframe").innerHTML=Header + TS + Maps } else { document.getElementById("listframe").innerHTML=Header + TS + AC + Maps }
+    if ( vv == "07") { document.getElementById("listframe").innerHTML=Header + TS + AC + Maps + ZN+QBO} else if ( vv == "NEMO") { document.getElementById("listframe").innerHTML=Header + TS + Maps } else { document.getElementById("listframe").innerHTML=Header + TS + AC + Maps }
 
 }
 
@@ -578,15 +530,13 @@ function showextra(vv,vl) {
 
   <a onclick="showinfo('Info','Experiment details')"   href="#Info">Info</a>
 
-  <a onclick="showdata('CAM','atm')"    class="red"    href="#CAM">CAM</a>
+  <a onclick="showdata('05','atm')"    class="red"    href="#05">05</a>
 
-  <a onclick="showdata('CLM','lnd')"    class="green"  href="#CLM">CLM</a>
+  <a onclick="showdata('07','ice')"   class="yellow" href="#07">07</a>
 
-  <a onclick="showdata('CICE','ice')"   class="yellow" href="#CICE">CICE</a>
+  <a onclick="showdata('11','ocn')"   class="aqua" href="#11">11</a>
 
-  <a onclick="showdata('NEMO','ocn')"   class="aqua" href="#NEMO">NEMO</a>
-
-  <a onclick="showextra('EXTRA','')"    class="gray"   href="#EXTRA">EXTRA</a>
+  <a onclick="showextra('10','')"    class="gray"   href="#10">10</a>
 
 </div>
 

@@ -26,6 +26,8 @@ export st=${12}
 export cmp2obs=${13}
 export do_anncyc=${14}
 do_2d_plt=${15}
+pltdir=${16}
+mkdir -p $pltdir
 #fi
 # END SECTION TO BE MODIFIED BY USER
 
@@ -90,8 +92,6 @@ fi
     # time-series zonal plot (3+5)
  
     ## NAMELISTS
-pltdir=$dirdiag/plots/bias
-mkdir -p $pltdir
 
 export units
 export title

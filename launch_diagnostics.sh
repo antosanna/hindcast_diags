@@ -19,9 +19,9 @@ set -eux
 # SECTION TO BE MODIFIED BY USER
 debug=0
 nmaxproc=6
-sec1=1  #flag to execute section1 (1=yes; 0=no) COMPUTE ENSMEAN
+sec1=0  #flag to execute section1 (1=yes; 0=no) COMPUTE ENSMEAN
 sec2=0  #flag to execute section2 (1=yes; 0=no) COMPUTE PERCENTILES
-sec3=1  #flag to execute section3 (1=yes; 0=no) TIMESERIES, 2D-MAPS, ANNCYC
+sec3=0  #flag to execute section3 (1=yes; 0=no) TIMESERIES, 2D-MAPS, ANNCYC
 sec4=1  #flag to execute section4 (1=yes; 0=no) ACC
 #export clim3d="MERRA2"
 export clim3d="ERA5"
@@ -124,7 +124,7 @@ mkdir -p $dirdiagst/scripts
     # time-series zonal plot (3+5)
  
     ## NAMELISTS
-pltdir=$dirdiagst/plots
+pltdir=$dirdiag/plots/07
 mkdir -p $pltdir
 
 export pltype="png"
@@ -134,7 +134,7 @@ then
 fi
 export units
 export title
-allvars_atm="TREFHT PRECT PSL"
+allvars_atm="TREFHT" # PRECT PSL"
 #allvars_atm="TREFMNAV TREFMXAV T850 PRECC ICEFRAC Z500 PSL TREFHT TS PRECT"
 allvars_lnd="SNOWDP FSH TLAI FAREA_BURNED";
 allvars_ice="aice snowfrac ext Tsfc fswup fswdn flwdn flwup congel fbot albsni hi";
@@ -282,7 +282,8 @@ do
       ijob=0
       for varmod in $allvars
       do
-         $DIR_UTIL/submitcommand.sh -m $machine -q $serialq_l -M 1800 -j diagnostics_single_var_${st}${varmod} -l ${here}/logs/ -d ${here} -s diagnostics_single_var.sh -i "$lasty $cmp2obs $pltype $varmod $comp $do_timeseries $do_atm $do_lnd $do_ice $dirdiag $nmaxens $st $cmp2obs $do_anncyc $do_2d_plt"
+         mkdir -p $pltdir/bias
+         $DIR_UTIL/submitcommand.sh -m $machine -q $serialq_l -M 1800 -j diagnostics_single_var_${st}${varmod} -l ${here}/logs/ -d ${here} -s diagnostics_single_var.sh -i "$lasty $cmp2obs $pltype $varmod $comp $do_timeseries $do_atm $do_lnd $do_ice $dirdiag $nmaxens $st $cmp2obs $do_anncyc $do_2d_plt $pltdir/bias"
          while `true`
          do
             ijob=`$DIR_UTIL/findjobs.sh -m $machine -n compute_ensmean_ -c yes`
@@ -301,6 +302,9 @@ fi   # end of section3
 
 ############################################
 #  End of third section
+############################################
+############################################
+#  section 4 : ACC
 ############################################
 if [[ $sec4 -eq 1 ]]
 then
@@ -329,9 +333,9 @@ then
 
              mkdir -p $pltdir/acc
              inputm=`ls -tr $dirdiag/$var/ANOM/cam.$ftype.$st.$var.all_anom.${iniy_hind}-????.$nmaxens.nc|tail -1`
-             for region in GLOBAL
+             for region in global
              do
-                $DIR_UTIL/submitcommand.sh -m $machine -q $serialq_l -M 1800 -j compute_ACC_${st}${var} -l ${here}/logs/ -d ${here} -s compute_ACC.sh -i "$lasty $nmaxens $st $region $title $lat0 $lat1 l$lon0 $lon1 ${var} $pltdir/acc $dirdiag"
+                $DIR_UTIL/submitcommand.sh -m $machine -q $serialq_l -M 10000 -j compute_ACC_${st}${var} -l ${here}/logs/ -d ${here} -s compute_ACC.sh -i "$lasty $nmaxens $st $pltdir/acc $varmod $ftype $dirdiag $region"
              done
 
           done
@@ -339,7 +343,7 @@ then
     done
 fi
 ############################################
-#  end of second section
+#  end of section 4
 ############################################
 
 

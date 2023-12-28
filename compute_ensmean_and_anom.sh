@@ -84,13 +84,17 @@ do
    for ff in $listfull
    do
       caso=`echo $ff|cut -d '.' -f1`
-      cdo sub $ff $hindclimfile $dirdiagvar/ANOM/$caso.cam.$ftype.$var.monmean.nc
-      listanom+=" $dirdiagvar/ANOM/$caso.cam.$ftype.$var.monmean.nc"
+      cdo sub $ff $hindclimfile $dirdiagvar/ANOM/${caso}_${var}.$ftype.anom.$iniy_hind-$lasty.$nmaxens.nc
+      listanom+=" $dirdiagvar/ANOM/${caso}_${var}.$ftype.anom.$iniy_hind-$lasty.$nmaxens.nc"
    done
    if [[ ! -f $dirdiagvar/ANOM/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc ]]
    then
       ncecat $listanom $dirdiagvar/ANOM/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc
       ncrename -O -d record,ens $dirdiagvar/ANOM/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc
+   fi
+   if [[ ! -f $dirdiagvar/ANOM/cam.$ftype.$yyyy$st.$var.ens_anom.$iniy_hind-$lasty.$nmaxens.nc ]]
+   then
+      cdo ensmean $listanom $dirdiagvar/ANOM/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc
    fi
 done
 if [[ ! -f $dirdiagvar/ANOM/cam.$ftype.$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc ]]

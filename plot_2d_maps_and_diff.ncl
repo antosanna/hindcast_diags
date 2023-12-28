@@ -296,7 +296,9 @@ begin
      if (varmod.eq."FSNT") then
           res@gsnLeftString   = LeftString
      end if
-     tclim_in_obs = linint2_Wrap (lonmod,latmod,tclim, True, lon,lat, 0)
+     tclimflip=lonFlip(tclim)
+     lonmodflip=where(lonmod.gt.180.,lonmod,lonmod-360)
+     tclim_in_obs = linint2_Wrap (lonmodflip,latmod,tclimflip, True, lon,lat(::-1), 0)
      printMinMax(tclim_in_obs,0)
      diff=tclim_in_obs-tobsclim
      diff!0="lat"
