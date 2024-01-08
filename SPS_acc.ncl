@@ -3,6 +3,7 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_csm.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/contributed.ncl"
 ;************************************************
+; to compute ACC
 undef("add_map_tickmarks2")
 function add_map_tickmarks2(wks,plot,res)
 local res2, bres, vpx, vpy, vpw, vph, xndc, yndc, npts, n, j, nlat, \
