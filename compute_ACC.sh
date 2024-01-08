@@ -26,7 +26,7 @@ export region=$8
 mkdir -p $dirplots
 export pltype=png
 
-diro=/work/csp/as34319/diagnostics/SPS4_hindcast/OBS/VALIDATION/
+diro=/work/csp/$USER/diagnostics/SPS4_hindcast/OBS/VALIDATION/
 mod=SPS4
 export iniy=$iniy_hind
 case $st

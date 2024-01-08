@@ -360,7 +360,7 @@ opt=1
   var=getenv("var")
   nrun=getenv("nrun")
   plname=getenv("plname")  ;dirplots+"/"+model+"_ACC_"+region+"_"+var+"_"+st+"_l"+leadtime
-  plname="plot_test" ;dirplots+"/"+model+"_ACC_"+region+"_"+var+"_"+st+"_l"+leadtime
+;  plname="plot_test" ;dirplots+"/"+model+"_ACC_"+region+"_"+var+"_"+st+"_l"+leadtime
 ;  cmap2 = read_colormap_file("nrl_sirkes")
   wks = gsn_open_wks(wks_type,plname)
 ;  gsn_define_colormap(wks,"test_acc")              ; choose colormap

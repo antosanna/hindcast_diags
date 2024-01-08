@@ -94,7 +94,7 @@ do
    fi
    if [[ ! -f $dirdiagvar/ANOM/cam.$ftype.$yyyy$st.$var.ens_anom.$iniy_hind-$lasty.$nmaxens.nc ]]
    then
-      cdo ensmean $listanom $dirdiagvar/ANOM/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc
+      cdo ensmean $listanom $dirdiagvar/ANOM/cam.$ftype.$yyyy$st.$var.ens_anom.$iniy_hind-$lasty.$nmaxens.nc
    fi
 done
 if [[ ! -f $dirdiagvar/ANOM/cam.$ftype.$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc ]]

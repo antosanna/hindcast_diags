@@ -162,13 +162,13 @@ article {
 
 
 
-var expid="cm3_cam122_cpl2000_bgc_t1qbo";
+var expid="DUMMYEXPID";
 
-var clim="0001-0018";
+var clim="DUMMYCLIM";
 
 
 
-var ATM=[ "TREFHT", "PRECT"];
+var ATM=[ "TREFHT", "PRECT", "PSL" ];
 var ATM5=ATM;
 var ATM7=ATM;
 
@@ -237,11 +237,11 @@ function showdata(vv,vl) {
 
         for ( var k = 0; k < tsl.length; k++) {
 
-           pic = expid+'.'+vl+'.'+list[i]+'.'+clim+'.ACC_'+tsl[k]+'.png';
+           pic = 'SPS4_ACC_global_'+list[i]+'_'+vv+'_l'+tsl[k]+'.15.'+clim+'.png';
 
-           AC+='<div class=box> <a href="'+vl+'/'+pic+'"> <img class=pics src="'+vl+'/'+pic+'"/> </a>';
+           AC+='<div class=box> <a href="acc/'+pic+'"> <img class=pics src="acc/'+pic+'"/> </a>';
 
-           AC+='<p> <a href="'+vl+'/'+pic+'">'+tsl[k]+'</a> </p> </div>';
+           AC+='<p> <a href="acc/'+pic+'">'+tsl[k]+'</a> </p> </div>';
 
         }
 
@@ -414,9 +414,9 @@ function showextra(vv,vl) {
 
   <big> <strong style="font-size: 120%" >CMCC-CM3</strong> Compact Diagnostics : &nbsp; </big>
 
-  <big> <strong style="font-size: 120%" >cm3_cam122_cpl2000_bgc_t1qbo</strong> &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;</big>
+  <big> <strong style="font-size: 120%" >SPS4</strong> &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;</big>
 
-  <big>Simulated period : 0001-0018  &nbsp;&nbsp; &nbsp;&nbsp;</big>
+  <big>Simulated period : DUMMYCLIM  &nbsp;&nbsp; &nbsp;&nbsp;</big>
 
 </header>
 

@@ -22,7 +22,7 @@ nmaxproc=6
 sec1=0  #flag to execute section1 (1=yes; 0=no) COMPUTE ENSMEAN
 sec2=0  #flag to execute section2 (1=yes; 0=no) COMPUTE PERCENTILES
 sec3=0  #flag to execute section3 (1=yes; 0=no) TIMESERIES, 2D-MAPS, ANNCYC
-sec4=1  #flag to execute section4 (1=yes; 0=no) ACC
+sec4=0  #flag to execute section4 (1=yes; 0=no) ACC
 #export clim3d="MERRA2"
 export clim3d="ERA5"
 sec5=0  #flag for section5 (=QBO postproc) (1=yes; 0=no)
@@ -124,7 +124,7 @@ mkdir -p $dirdiagst/scripts
     # time-series zonal plot (3+5)
  
     ## NAMELISTS
-pltdir=$dirdiag/plots/07
+pltdir=$dirdiag/plots/$st
 mkdir -p $pltdir
 
 export pltype="png"
@@ -134,7 +134,7 @@ then
 fi
 export units
 export title
-allvars_atm="TREFHT" # PRECT PSL"
+allvars_atm="PSL"  #"TREFHT PRECT"
 #allvars_atm="TREFMNAV TREFMXAV T850 PRECC ICEFRAC Z500 PSL TREFHT TS PRECT"
 allvars_lnd="SNOWDP FSH TLAI FAREA_BURNED";
 allvars_ice="aice snowfrac ext Tsfc fswup fswdn flwdn flwup congel fbot albsni hi";
@@ -335,7 +335,7 @@ then
              inputm=`ls -tr $dirdiag/$var/ANOM/cam.$ftype.$st.$var.all_anom.${iniy_hind}-????.$nmaxens.nc|tail -1`
              for region in global
              do
-                $DIR_UTIL/submitcommand.sh -m $machine -q $serialq_l -M 10000 -j compute_ACC_${st}${var} -l ${here}/logs/ -d ${here} -s compute_ACC.sh -i "$lasty $nmaxens $st $pltdir/acc $varmod $ftype $dirdiag $region"
+                $DIR_UTIL/submitcommand.sh -m $machine -q $serialq_l -M 10000 -j compute_ACC_${st}${var} -l ${here}/logs/ -d ${here} -s compute_ACC.sh -i "$lasty $nmaxens $st $pltdir/acc $var $ftype $dirdiag $region"
              done
 
           done
@@ -353,14 +353,22 @@ if [[ -f $pltdir/index.html ]]
 then
    rm -f $pltdir/index.html
 fi
-for fld in `ls $pltdir/bias/*$st.${startyear}-${lasty}.$nmaxens.*|rev|cut -d '.' -f 4|rev|sort -n |uniq`
+#for fld in `ls $pltdir/bias/*$st.${startyear}-${lasty}.$nmaxens.*|rev|cut -d '.' -f 4|rev|sort -n |uniq`
+#do
+#   bias+=" \"$fld\","
+#done
+#sed -e 's/DUMMYCLIM/'$startyear-${lasty}'/g;s/DUMMYEXPID/'$SPSSystem'/g;s/biaslist/'"$bias"'/g;s/acclist/'"$acc"'/g;s/roclist/'"$roc"'/g' index_tmpl.html > $pltdir/index.html
+
+for fld in `ls $pltdir/acc/*$st*$nmaxens.${startyear}-${lasty}*|rev|cut -d '.' -f 4|rev|sort -n |uniq`
 do
-   bias+=" \"$fld\","
+   acc+=" \"$fld\","
 done
-sed -e 's/DUMMYCLIM/'$startyear-${lasty}'/g;s/DUMMYEXPID/'$SPSSystem'/g;s/biaslist/'"$bias"'/g;s/acclist/'"$acc"'/g;s/roclist/'"$roc"'/g' index_tmpl.html > $pltdir/index.html
+sed -e 's@DUMMYCLIM@'$startyear-${lasty}'@g;s@DUMMYEXPID@'$SPSSystem'@g;s@acclist@'"$acc"'@g' index_test.html > $pltdir/index.html
+
 cd $pltdir
 
 
-tar -cvf $SPSSystem.$st.$startyear-${lasty}.$nmaxens.VSobs.tar bias acc roc
+#tar -cvf $SPSSystem.$st.$startyear-${lasty}.$nmaxens.VSobs.tar bias acc roc
+tar -cvf $SPSSystem.$st.$startyear-${lasty}.$nmaxens.VSobs.tar acc index.html
 gzip -f $SPSSystem.$st.$startyear-${lasty}.$nmaxens.VSobs.tar
 
