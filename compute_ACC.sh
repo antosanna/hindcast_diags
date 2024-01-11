@@ -59,7 +59,7 @@ case $varm
 esac
 case $mod
  in
-   SPS4) dirm=$dirdiag/$varm/ANOM;;
+   SPS4) dirm=$dirdiag/$st/$varm/ANOM;;
    SPS3) dirm=$WORK/$mod/CESM/monthly/$dirvarm/anom/ ;;
 esac
 

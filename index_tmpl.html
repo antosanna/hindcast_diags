@@ -164,11 +164,11 @@ article {
 
 var expid="DUMMYEXPID";
 
-var clim="DUMMYCLIM";
+var clim="1993-2022";
 
 
+var ATM=[ "TREFHT", "PRECT", "PSL" ];
 
-var diags=["BIAS","ACC"];
 
 
 
@@ -200,7 +200,27 @@ function showdata(vv,vl) {
 
     /* set list of variables to plot */
 
-    var list = diags
+    if ( vv == "12") { var list = ATM; vl = "atm12"; lasty= "lasty12"; nmaxens = "nmaxens12"};
+    if ( vv == "11") { var list = ATM; vl = "atm11"; lasty= "lasty11"; nmaxens = "nmaxens11"};
+    if ( vv == "10") { var list = ATM; vl = "atm10"; lasty= "lasty10"; nmaxens = "nmaxens10"};
+
+    if ( vv == "09") { var list = ATM; vl = "atm9"; lasty= "lasty09"; nmaxens = "nmaxens09"};
+    if ( vv == "08") { var list = ATM; vl = "atm8"; lasty= "lasty08"; nmaxens = "nmaxens08"};
+    if ( vv == "07") { var list = ATM; vl = "atm7"; lasty= "lasty07"; nmaxens = "nmaxens07"};
+    if ( vv == "06") { var list = ATM; vl = "atm6"; lasty= "lasty06"; nmaxens = "nmaxens06"};
+
+    if ( vv == "05") { var list = ATM; vl = "atm5"; lasty= "lasty05"; nmaxens = "nmaxens05"};
+    if ( vv == "04") { var list = ATM; vl = "atm4"; lasty= "lasty04"; nmaxens = "nmaxens04"};
+    if ( vv == "03") { var list = ATM; vl = "atm3"; lasty= "lasty03"; nmaxens = "nmaxens03"};
+    if ( vv == "02") { var list = ATM; vl = "atm2"; lasty= "lasty02"; nmaxens = "nmaxens02"};
+    if ( vv == "01") { var list = ATM; vl = "atm1"; lasty= "lasty01"; nmaxens = "nmaxens01"};
+
+    if ( vv == "CLM") { var list = LND; vl = "lnd"};
+
+    if ( vv == "CICE") { var list = ICE; vl = "ice"};
+
+    if ( vv == "NEMO") { var list = OCN; vl = "ocn"};
+
 
 
     var pic = ""
@@ -210,187 +230,72 @@ function showdata(vv,vl) {
     var Header='';
 
 
-
-    var TS='<h2 style="background-color:#DDDDDD;"> '+vv+' - TIMESERIES '+'</h2> <div class=box>';
+    var AC='<h2 style="background-color:#DDDDDD;"> '+vv+' - ANOMALY CORRELATION COEFFICIENT  now up to '+lasty+'</h2> <div class=box>';
 
     /* time series */
 
-    var tsn=["3","5","2"]; var tsl=["GLOBAL","ZONAL","OCEAN/LAND"];
+    var tsl=["0","1","2","3"]; 
 
-    /*if ( vv == "CICE") { tsn.push("clim"); tsl.push("CLIM") };*/
 
     var k = 0 ;
 
     for (var i = 0; i < list.length; i++) {
 
-        if ( list[i] == "ICEFRAC") { var tsn=["3","5"]; var tsl=["GLOBAL","ZONAL"]} else { var tsn=["3","5","2"]; var tsl=["GLOBAL","ZONAL","OCEAN/LAND"]};
-        if ( vv == "CLM") { var tsn=["3","5"]; var tsl=["GLOBAL","ZONAL"]};
-        if ( vv == "NEMO") { var tsn=["1"]; var tsl=["GLOBAL"]};
-        TS+='<div class=box> <h3 style="background-color:#f0f0f0;"> '+list[i]+' </h3>';
+        AC+='<div class=box> <h3 style="background-color:#f0f0f0;"> '+list[i]+' </h3>';
 
-        for ( var k = 0; k < tsn.length; k++) {
+        for ( var k = 0; k < tsl.length; k++) {
 
-           pic = expid+'.'+vl+'.'+list[i]+'.'+clim+'.TS_'+tsn[k]+'.png';
+           pic = 'SPS4_ACC_global_'+list[i]+'_'+vv+'_l'+tsl[k]+'.'+nmaxens+'.1993-'+lasty+'.png';
 
-           TS+='<div class=box> <a href="'+vl+'/'+pic+'"> <img class=pics src="'+vl+'/'+pic+'"/> </a>';
+           AC+='<div class=box> <a href="'+vv+'/acc/'+pic+'"> <img class=pics src="'+vv+'/acc/'+pic+'"/> </a>';
 
-           TS+='<p> <a href="'+vl+'/'+pic+'">'+tsl[k]+'</a> </p> </div>';
+           AC+='<p> <a href="'+vv+'/acc/'+pic+'">'+"lead "+tsl[k]+'</a> </p> </div>';
 
         }
 
-        TS+='</div>';
+        AC+='</div>';
 
     }
 
-    TS+='</div> </div>';
+    AC+='</div> </div>';
 
-    TS+='<div class=after-box> </div>';
-
-
-
-    var Maps='';
+    AC+='<div class=after-box> </div>';
 
 
-    /* Maps */
 
-    if ( vv == "CICE") {
+    var BS='<h2 style="background-color:#DDDDDD;"> '+vv+' - BIAS now up to '+lasty+'</h2> <div class=box>';
 
-       var poles = ["Arctic", "Antarctic"];
+    /* time series */
 
-       var seas = ["FM", "SO", "ANN"];
-
-       for (var p = 0; p < poles.length; p++) {
-
-          Maps+='<h2 style="background-color:#DDDDDD;">MAPS '+poles[p]+'</h2> <div class=box>';
-
-          for (var i = 0; i < list.length; i++) {
-
-             Maps+='<div class=box> <h3 style="background-color:#f0f0f0;"> '+list[i]+' </h3>';
-
-             for (var s = 0; s < seas.length; s++) {
-
-                pic = expid+'.'+vl+'.'+list[i]+'.map_'+poles[p]+'_'+seas[s]+'.png';
-
-                Maps+='<div class=box> <a href="'+vl+'/'+pic+'"> <img class=pics src="'+vl+'/'+pic+'"/> </a>';
-
-                Maps+='<p> <a href="'+vl+'/'+pic+'">'+seas[s]+'</a> </p> </div>';
-
-             };
-
-             Maps+='</div>';
-
-          };
-
-          Maps+='</div>';
-
-          Maps+='<div class=after-box> </div>';
-
-       };
-
-    } else {
-
-       Maps+='<h2 style="background-color:#DDDDDD;"> '+vv+' - Maps '+'</h2> <div class=box>'
-
-       var seas = ["DJF", "JJA", "ANN"];
-
-          for (var i = 0; i < list.length; i++) {
-
-             Maps+='<div class=box> <h3 style="background-color:#f0f0f0;"> '+list[i]+' </h3>';
-
-             for (var s = 0; s < seas.length; s++) {
-
-                pic = expid+'.'+vl+'.'+list[i]+'.map_'+seas[s]+'.'+clim+'.png';
-
-                Maps+='<div class=box> <a href="'+vl+'/'+pic+'"> <img class=pics src="'+vl+'/'+pic+'"/> </a>';
-
-                Maps+='<p> <a href="'+vl+'/'+pic+'">'+seas[s]+'</a> </p> </div>';
-
-             };
-
-             Maps+='</div>';
-
-          };
-
-          Maps+='</div>';
-
-          Maps+='<div class=after-box> </div>';
-
-    };
+    var tsl=["0","1","2","3"]; 
 
 
-    var ZN='';
-
-    if ( vv == "07") { list = ATMzonal } else {list = "" };
-
-    /* ZN */
-
-
-    ZN+='<h2 style="background-color:#DDDDDD;"> '+vv+' - Zonal Means '+'</h2> <div class=box>'
-
-    var seas = ["DJF", "JJA", "ANN"];
-    var rean = ["ERA5","MERRA2"];
-
-    for (var i = 0; i < list.length; i++) {
-        for (var j = 0; j < rean.length; j++) {
-
-             ZN+='<div class=box> <h3 style="background-color:#f0f0f0;"> '+list[i]+'-'+rean[j]+' </h3>'; 
-
-             for (var s = 0; s < seas.length; s++) {
-
-<!--                pic = expid+'.'+vl+'.'+list[i]+'.map_'+seas[s]+'.png';-->
-                pic = expid+'.VS.'+rean[j]+'.zonalmean.'+list[i]+'.'+clim+'.'+seas[s]+'.png';
-
-                ZN+='<div class=box> <a href="'+vl+'/'+pic+'"> <img class=pics src="'+vl+'/'+pic+'"/> </a>';
-
-                ZN+='<p> <a href="'+vl+'/'+pic+'">'+seas[s]+'</a> </p> </div>';
-
-             };
-
-             ZN+='</div>';
-
-         };           
-    };           
-
-    ZN+='</div>';
-
-    ZN+='<div class=after-box> </div>';
-
-  
-    var QBO='';
-
-    if ( vv == "07") { list = "U" };
-
-
-    QBO+='<h2 style="background-color:#DDDDDD;"> U - QBO '+'</h2> <div class=box>'
-
-    /* var seas = ["DJF", "JJA", "ANN"];*/
-    var seas = ["ANN"];
+    var k = 0 ;
 
     for (var i = 0; i < list.length; i++) {
 
-             QBO+='<div class=box> <h3 style="background-color:#f0f0f0;"> '+list[i]+' </h3>'; 
+        BS+='<div class=box> <h3 style="background-color:#f0f0f0;"> '+list[i]+' </h3>';
 
-             for (var s = 0; s < seas.length; s++) {
+        for ( var k = 0; k < tsl.length; k++) {
 
-                /*pic = 'QBO_'+expid+'.'+clim+'.'+seas[s]+'.png';*/
-                pic = 'QBO_'+expid+'.'+clim+'.png';
+           pic = 'SPS4_BIAS_'+list[i]+'_'+vv+'_l'+tsl[k]+'.'+nmaxens+'.1993-'+lasty+'.png';
 
-                QBO+='<div class=box> <a href="'+vl+'/'+pic+'"> <img class=pics src="'+vl+'/'+pic+'"/> </a>';
+           BS+='<div class=box> <a href="'+vv+'/bias/'+pic+'"> <img class=pics src="'+vv+'/bias/'+pic+'"/> </a>';
 
-                QBO+='<p> <a href="'+vl+'/'+pic+'">'+seas[s]+'</a> </p> </div>';
+           BS+='<p> <a href="'+vv+'/bias/'+pic+'">'+"lead "+tsl[k]+'</a> </p> </div>';
 
-             };
+        }
 
-             QBO+='</div>';
+        BS+='</div>';
 
-    };           
+    }
 
-    QBO+='</div>';
+    BS+='</div> </div>';
 
-    QBO+='<div class=after-box> </div>';
+    BS+='<div class=after-box> </div>';
 
-
-    if ( vv == "07") { document.getElementById("listframe").innerHTML=Header + TS + AC + Maps + ZN+QBO} else if ( vv == "NEMO") { document.getElementById("listframe").innerHTML=Header + TS + Maps } else { document.getElementById("listframe").innerHTML=Header + TS + AC + Maps }
+/*    document.getElementById("listframe").innerHTML=Header + BS + AC */
+    document.getElementById("listframe").innerHTML=Header + AC
 
 }
 
@@ -518,9 +423,9 @@ function showextra(vv,vl) {
 
   <big> <strong style="font-size: 120%" >CMCC-CM3</strong> Compact Diagnostics : &nbsp; </big>
 
-  <big> <strong style="font-size: 120%" >DUMMYEXPID</strong> &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;</big>
+  <big> <strong style="font-size: 120%" >SPS4</strong> &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;</big>
 
-  <big>Simulated period : DUMMYCLIM  &nbsp;&nbsp; &nbsp;&nbsp;</big>
+  <big>Reference period : DUMMYCLIM  &nbsp;&nbsp; &nbsp;&nbsp;</big>
 
 </header>
 
@@ -529,14 +434,22 @@ function showextra(vv,vl) {
 <div class="topnav">
 
   <a onclick="showinfo('Info','Experiment details')"   href="#Info">Info</a>
+  <a onclick="showdata('01','atm1')"    class="green"  href="#01">01</a>
+  <a onclick="showdata('03','atm3')"    class="green"  href="#03">03</a>
+  <a onclick="showdata('05','atm5')"    class="green"  href="#05">05</a>
+  <a onclick="showdata('07','atm7')"    class="green"  href="#07">07</a>
+  <a onclick="showdata('09','atm9')"    class="green"  href="#09">09</a>
+  <a onclick="showdata('11','atm11')"    class="green"  href="#11">11</a>
 
-  <a onclick="showdata('05','atm')"    class="red"    href="#05">05</a>
+  <a onclick="showdata('02','atm2')"    class="red"    href="#02">02</a>
+  <a onclick="showdata('04','atm4')"    class="red"    href="#04">04</a>
+  <a onclick="showdata('06','atm6')"    class="red"    href="#06">06</a>
+  <a onclick="showdata('08','atm8')"    class="red"    href="#08">08</a>
+  <a onclick="showdata('10','atm10')"    class="red"    href="#10">10</a>
+  <a onclick="showdata('12','atm12')"    class="red"    href="#12">12</a>
 
-  <a onclick="showdata('07','ice')"   class="yellow" href="#07">07</a>
 
-  <a onclick="showdata('11','ocn')"   class="aqua" href="#11">11</a>
 
-  <a onclick="showextra('10','')"    class="gray"   href="#10">10</a>
 
 </div>
 

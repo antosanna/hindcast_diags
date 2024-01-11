@@ -13,13 +13,14 @@ nmaxens=$1
 var=$2
 st=$3
 dirdiag=$4
+lasty=$5
 echo 'NOW MAX ENSEMBLE SET TO '$nmaxens
          
+dirdiagstvar=$dirdiag/$st/$var
 dirdiagvar=$dirdiag/$var
-mkdir -p $dirdiagvar
+mkdir -p $dirdiagstvar
 cd $dirdiagvar
 #for yyyy in `seq $iniy_hind $endy_hind`
-lasty=1999
 for yyyy in `seq $iniy_hind $lasty`
 do
 		nens=0
@@ -31,10 +32,14 @@ do
      set +euvx
      . $dictionary
      set -euvx
-					if [[ ! -f $inpfile ]]
+					if [[ ! -f $check_6months_done ]]
 					then 
-        echo "$caso not completed"
-								continue
+# cases transferred from Zeus (DIR_CASES are not transferred)
+        if [[ ! -f $DIR_ARCHIVE1/${caso}.transfer_from_Zeus_DONE ]]
+        then
+           echo "$caso not completed"
+			   					continue
+        fi
 					fi
 # do the monthly mean
 					filevarmonmean=$dirdiagvar/$caso.cam.$ftype.$var.$yyyy$st.monmean.nc
@@ -59,7 +64,6 @@ do
 											then
 														cdo ensmean $inpfilelist $yfilevarensmean
 											fi
-#											lasty=$yyyy
            break
 								fi
 					done #loop on ens
@@ -75,30 +79,31 @@ then
    done
    cdo -ensmean $list4hindclim $hindclimfile
 fi
-mkdir -p $dirdiagvar/ANOM
+anomdir=$dirdiagstvar/ANOM
+mkdir -p $anomdir
 for yyyy in `seq $iniy_hind $lasty`
 do
    listfull=""
    listanom=""
-   listfull=`ls ${SPSSystem}_${yyyy}${st}_0??.cam.$ftype.$var.$yyyy$st.monmean.nc`
+   listfull=`ls ${SPSSystem}_${yyyy}${st}_0??.cam.$ftype.$var.$yyyy$st.monmean.nc|head -n $nmaxens`
    for ff in $listfull
    do
       caso=`echo $ff|cut -d '.' -f1`
-      cdo sub $ff $hindclimfile $dirdiagvar/ANOM/${caso}_${var}.$ftype.anom.$iniy_hind-$lasty.$nmaxens.nc
-      listanom+=" $dirdiagvar/ANOM/${caso}_${var}.$ftype.anom.$iniy_hind-$lasty.$nmaxens.nc"
+      cdo sub $ff $hindclimfile $anomdir/${caso}_${var}.$ftype.anom.$iniy_hind-$lasty.$nmaxens.nc
+      listanom+=" $anomdir/${caso}_${var}.$ftype.anom.$iniy_hind-$lasty.$nmaxens.nc"
    done
-   if [[ ! -f $dirdiagvar/ANOM/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc ]]
+   if [[ ! -f $anomdir/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc ]]
    then
-      ncecat $listanom $dirdiagvar/ANOM/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc
-      ncrename -O -d record,ens $dirdiagvar/ANOM/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc
+      ncecat $listanom $anomdir/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc
+      ncrename -O -d record,ens $anomdir/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc
    fi
-   if [[ ! -f $dirdiagvar/ANOM/cam.$ftype.$yyyy$st.$var.ens_anom.$iniy_hind-$lasty.$nmaxens.nc ]]
+   if [[ ! -f $anomdir/cam.$ftype.$yyyy$st.$var.ens_anom.$iniy_hind-$lasty.$nmaxens.nc ]]
    then
-      cdo ensmean $listanom $dirdiagvar/ANOM/cam.$ftype.$yyyy$st.$var.ens_anom.$iniy_hind-$lasty.$nmaxens.nc
+      cdo ensmean $listanom $anomdir/cam.$ftype.$yyyy$st.$var.ens_anom.$iniy_hind-$lasty.$nmaxens.nc
    fi
 done
-if [[ ! -f $dirdiagvar/ANOM/cam.$ftype.$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc ]]
+if [[ ! -f $anomdir/cam.$ftype.$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc ]]
 then
-   ncecat  $dirdiagvar/ANOM/cam.$ftype.????$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc $dirdiagvar/ANOM/cam.$ftype.$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc
-   ncrename -O -d record,year $dirdiagvar/ANOM/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc
+   ncecat  $anomdir/cam.$ftype.????$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc $anomdir/cam.$ftype.$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc
+   ncrename -O -d record,year $anomdir/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc
 fi

@@ -20,7 +20,7 @@ export do_timeseries=${6}
 export do_atm=${7}
 export do_lnd=${8}
 
-dirdiag=${10}
+dirdiagst=${10}
 nmaxens=${11}
 export st=${12}
 export cmp2obs=${13}
@@ -31,7 +31,7 @@ mkdir -p $pltdir
 #fi
 # END SECTION TO BE MODIFIED BY USER
 
-mkdir -p $dirdiag
+mkdir -p $dirdiagst
 export startyear=${iniy_hind}
 export mftom1=1
 export varobs
@@ -117,8 +117,8 @@ do
             ice) realm=cice;;
          esac
          #serie di valori annui
-#         ymeanfilevar=$dirdiag/${exp}.$realm.$var.$startyear-$lasty.ymean.nc
-#         if [[ ! -f $dirdiag/${exp}.$realm.$var.$startyear.nc ]]
+#         ymeanfilevar=$dirdiagst/${exp}.$realm.$var.$startyear-$lasty.ymean.nc
+#         if [[ ! -f $dirdiagst/${exp}.$realm.$var.$startyear.nc ]]
 #         then
 #            continue
 #         fi
@@ -127,7 +127,7 @@ do
 #            cdo yearmean -mergetime $listaf $ymeanfilevar
 #         fi
          #ciclo annuo
-#         anncycfilevar=$dirdiag/${exp}.$realm.$var.$startyear_anncyc-$lasty.anncyc.nc
+#         anncycfilevar=$dirdiagst/${exp}.$realm.$var.$startyear_anncyc-$lasty.anncyc.nc
 #         cdo ymonmean -mergetime $listaf_anncyc $anncycfilevar
       done
 done #expid
@@ -138,7 +138,7 @@ export varmod=$var
 units=""
 export units_from_here=0
 export name_from_here=0
-#if [[ ! -f $dirdiag/${SPSSystem}.$realm.$varmod.$startyear-${lasty}.ymean.nc ]]
+#if [[ ! -f $dirdiagst/${SPSSystem}.$realm.$varmod.$startyear-${lasty}.ymean.nc ]]
 #then
 #            continue
 #fi
@@ -229,7 +229,7 @@ then
       for ftype in $typelist
       do
          echo "---now plotting 2d $varmod"
-         export inpfile=$dirdiag/$varmod/CLIM/${realm}.$ftype.$st.$varmod.clim.$startyear-${lasty}.$nmaxens.nc
+         export inpfile=$dirdiagst/$varmod/CLIM/${realm}.$ftype.$st.$varmod.clim.$startyear-${lasty}.$nmaxens.nc
          if [[ ! -f $inpfile ]]
          then
             continue
@@ -242,7 +242,7 @@ then
          mkdir -p $SCRATCHDIR/tmp/scripts/
          for lead in 0 1 2 3
          do
-            export pltname=$pltdir/BIAS.$varmod.$st.map_l${lead}.$startyear-${lasty}.$nmaxens.png
+            export pltname=$pltdir/SPS4_BIAS_${varmod}_${st}_l${lead}.$nmaxens.$startyear-${lasty}.png
             rsync -auv plot_2d_maps_and_diff.ncl $SCRATCHDIR/tmp/scripts/plot_2d_maps_and_diff.$st.$varmod.ncl
             ncl $SCRATCHDIR/tmp/scripts/plot_2d_maps_and_diff.$st.$varmod.ncl
             if [[ $pltype == "x11" ]]
@@ -255,7 +255,7 @@ then
 fi   # end 2d maps
 if [[ $do_anncyc -eq 1 ]]
 then
-   export inpfile=$dirdiag/${SPSSystem}.$realm.$varmod.$iniclim-$lasty.anncyc.nc
+   export inpfile=$dirdiagst/${SPSSystem}.$realm.$varmod.$iniclim-$lasty.anncyc.nc
    list_reg_anncyc="Global NH SH"
    if [[ $varmod == "U010" ]]
    then
@@ -270,25 +270,25 @@ then
          SH)export lat0=-90;export lat1=0;export bSH=1;;
          u010)export lat0=59.5;export lat1=60.5;export bu010=1;;
       esac
-      regfile=$dirdiag/`basename $inpfile|rev|cut -d '.' -f2-|rev`.$reg.nc
+      regfile=$dirdiagst/`basename $inpfile|rev|cut -d '.' -f2-|rev`.$reg.nc
       if [[ ! -f $regfile ]]
       then
          cdo fldmean -sellonlatbox,0,360,$lat0,$lat1 $inpfile $regfile
       fi
       if [[ $cmp2obs_ncl -eq 1 ]]
       then
-         regfileobs=$dirdiag/`basename $obsfile|rev|cut -d '.' -f2-|rev`.$reg.nc
+         regfileobs=$dirdiagst/`basename $obsfile|rev|cut -d '.' -f2-|rev`.$reg.nc
          if [[ ! -f $regfileobs ]]
          then
             cdo fldmean -sellonlatbox,0,360,$lat0,$lat1 $obsfile $regfileobs
          fi
       fi
    done
-   export rootinpfileobs=$dirdiag/`basename $obsfile|rev|cut -d '.' -f2-|rev` 
-   export inpfileanncyc=$dirdiag/`basename $inpfile|rev|cut -d '.' -f2-|rev` 
+   export rootinpfileobs=$dirdiagst/`basename $obsfile|rev|cut -d '.' -f2-|rev` 
+   export inpfileanncyc=$dirdiagst/`basename $inpfile|rev|cut -d '.' -f2-|rev` 
    export pltname=$pltdir/${SPSSystem}.$comp.$varmod.$startyear_anncyc-$lasty.anncyc_3.png
-   rsync -auv plot_anncyc.ncl $dirdiag/scripts/plot_anncyc.$varmod.ncl
-   ncl $dirdiag/scripts/plot_anncyc.$varmod.ncl
+   rsync -auv plot_anncyc.ncl $dirdiagst/scripts/plot_anncyc.$varmod.ncl
+   ncl $dirdiagst/scripts/plot_anncyc.$varmod.ncl
    if [[ $pltype == "x11" ]]
    then
       exit
@@ -309,24 +309,24 @@ then
          AfricaSH)lat0=-36;lat1=0;lon0=10;lon1=35;bAfricaSH=1;;
          Amazon)lat0=-50;lat1=12;lon0=-76;lon1=-45;bAmazon=1;;
       esac
-      regfile=$dirdiag/`basename $inpfile|rev|cut -d '.' -f2-|rev`.$reg.nc
+      regfile=$dirdiagst/`basename $inpfile|rev|cut -d '.' -f2-|rev`.$reg.nc
       if [[ ! -f $regfile ]]
       then
          cdo fldmean -sellonlatbox,$lon0,$lon1,$lat0,$lat1 $inpfile $regfile
       fi
       if [[ $cmp2obs_ncl -eq 1 ]]
       then
-         regfileobs=$dirdiag/`basename $obsfile|rev|cut -d '.' -f2-|rev`.$reg.nc
+         regfileobs=$dirdiagst/`basename $obsfile|rev|cut -d '.' -f2-|rev`.$reg.nc
          if [[ ! -f $regfileobs ]]
          then
             cdo fldmean -sellonlatbox,$lon0,$lon1,$lat0,$lat1 $obsfile $regfileobs
          fi
       fi
    done
-   export rootinpfileobs=$dirdiag/`basename $obsfile|rev|cut -d '.' -f2-|rev`
-   export inpfileanncyc=$dirdiag/`basename $inpfile|rev|cut -d '.' -f2-|rev`
+   export rootinpfileobs=$dirdiagst/`basename $obsfile|rev|cut -d '.' -f2-|rev`
+   export inpfileanncyc=$dirdiagst/`basename $inpfile|rev|cut -d '.' -f2-|rev`
    export pltname=$pltdir/${SPSSystem}.$comp.$varmod.$startyear_anncyc-$lasty.anncyc_5.png
-   ncl $dirdiag/scripts/plot_anncyc.$varmod.ncl
+   ncl $dirdiagst/scripts/plot_anncyc.$varmod.ncl
    if [[ $pltype == "x11" ]]
    then
       exit
@@ -338,13 +338,13 @@ then
    then
       for sea in JJA DJF ANN
       do
-         export inpfileznl=$dirdiag/${SPSSystem}.$comp.$varmod.$startyear-${lasty}.znl.$sea.nc
+         export inpfileznl=$dirdiagst/${SPSSystem}.$comp.$varmod.$startyear-${lasty}.znl.$sea.nc
          if [[ ! -f $inpfileznl ]]
          then
-            inpfileznl=$dirdiag/${SPSSystem}.$comp.$varmod.$startyear-${lasty}.znlmean.$sea.nc
+            inpfileznl=$dirdiagst/${SPSSystem}.$comp.$varmod.$startyear-${lasty}.znlmean.$sea.nc
             if [[ ! -f $inpfileznl ]]
             then
-               anncycfile=$dirdiag/${SPSSystem}.$realm.$varmod.$startyear-$lasy.anncyc.nc 
+               anncycfile=$dirdiagst/${SPSSystem}.$realm.$varmod.$startyear-$lasy.anncyc.nc 
                if [[ $sea != "ANN" ]]
                then
                   cdo timmean -selseason,$sea -zonmean $anncycfile $inpfileznl
@@ -366,8 +366,8 @@ then
                fi
             fi
          fi
-         rsync -auv plot_znlmean_2dfields.ncl $dirdiag/scripts/plot_znlmean_2dfields.$varmod.ncl
-         ncl $dirdiag/scripts/plot_znlmean_2dfields.$varmod.ncl
+         rsync -auv plot_znlmean_2dfields.ncl $dirdiagst/scripts/plot_znlmean_2dfields.$varmod.ncl
+         ncl $dirdiagst/scripts/plot_znlmean_2dfields.$varmod.ncl
       done
    fi
 fi
@@ -379,16 +379,16 @@ then
       # snow over Syberia
       for sea in JJA DJF ANN
       do
-         export inpfileznl=$dirdiag/${SPSSystem}.$comp.$varmod.$startyear-${lasty}.znl.$sea.nc
+         export inpfileznl=$dirdiagst/${SPSSystem}.$comp.$varmod.$startyear-${lasty}.znl.$sea.nc
          if [[ ! -f $inpfileznl ]]
          then
             listafznl=""
             for yyyy in `seq -f "%04g" $startyear $finalyear`
             do
-               inpfileznlyyyy=$dirdiag/${SPSSystem}.$comp.$varmod.$startyear-${lasty}.znl.$sea.nc
+               inpfileznlyyyy=$dirdiagst/${SPSSystem}.$comp.$varmod.$startyear-${lasty}.znl.$sea.nc
                if [[ ! -f $inpfileznlyyyy ]]
                then
-                  cdo selseason,$sea -zonmean -sellonlatbox,90,140,0,90 $dirdiag/${SPSSystem}.$realm.$varmod.$yyyy.nc $inpfileznlyyyy
+                  cdo selseason,$sea -zonmean -sellonlatbox,90,140,0,90 $dirdiagst/${SPSSystem}.$realm.$varmod.$yyyy.nc $inpfileznlyyyy
                fi
                listafznl+=" $inpfileznlyyyy"
             done

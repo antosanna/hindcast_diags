@@ -260,15 +260,15 @@ begin
 ; open file and read in variable
 ;***********************************************
   write="FALSE"
-  lasty=toint(getenv("lasty"))
-  iniy=toint(getenv("iniy"))
-  varm=getenv("varm")
-  varo=getenv("varo")
-  leadtime=getenv("leadtime")
-  model=getenv("mod")
-  region=getenv("region")
+  lasty=1999
+  iniy=1993
+  varm="PRECT"
+  varo="precip"
+  leadtime="1"
+  model="SPS4"
+  region="global"
 
-  infileo=getenv("inputo")
+  infileo="/work/csp/as34319/diagnostics/SPS4_hindcast/OBS/VALIDATION//GPCP/precip/precip_07_all_ano.1993-2016.nc"
   print("infileo "+infileo)
   in2  = addfile(infileo,"r")
 
@@ -278,8 +278,7 @@ begin
   lat = in2->lat
   lon = in2->lon
 
-  infilem=getenv("inputm")
-  nrun=getenv("nmaxens")
+  infilem="/work/csp/as34319/diagnostics/SPS4_hindcast/07/PRECT/ANOM/cam.h3.07.PRECT.all_anom.1993-1999.13.nc"
   in1  = addfile(infilem,"r")
   print("infilem "+infilem)
   sps = dim_avg_n(in1->$varm$(0:lasty-iniy,:,:,:,:),1) 
@@ -353,13 +352,14 @@ opt=1
 ;************************************************
 ; plot the correlations
 ;************************************************
-  dirplots=getenv("dirplots")
-  wks_type=getenv("pltype") ;"png"
-  plname=getenv("plname")  ;dirplots+"/"+model+"_ACC_"+region+"_"+varm+"_"+st+"_l"+leadtime
+  dirplots="."
+  wks_type="x11" ;"png"
+  st="07"
+  plname="pippo"  ;dirplots+"/"+model+"_ACC_"+region+"_"+varm+"_"+st+"_l"+leadtime
 ;  plname="plot_test" ;dirplots+"/"+model+"_ACC_"+region+"_"+varm+"_"+st+"_l"+leadtime
 ;  cmap2 = read_colormap_file("nrl_sirkes")
   wks = gsn_open_wks(wks_type,plname)
-  gsn_define_colormap(wks,"SPS_acc")              ; choose colormap
+  gsn_define_colormap(wks,"test_acc")              ; choose colormap
 ;  gsn_define_colormap(wks,"blueyellowred")              ; choose colormap
   plot = new(1,graphic)
 
@@ -417,8 +417,8 @@ res2@gsnCenterStringOrthogonalPosF = 0.1
   res2@cnFillOn    = True                                                ; turn on color fill
   res2@cnLinesOn   = False                                               ; turn off the contour lines
 
-  month=getenv("mon")
-  res2@tiMainString         = month+" start-date - lead season "+leadtime+" - members "+nrun
+  month="07"
+  res2@tiMainString         = month+" start-date - lead season "+leadtime
   res2@tiMainOffsetYF    = 0.0001
      res2@tiMainFontHeightF = 0.015	
 
