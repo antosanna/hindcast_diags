@@ -19,13 +19,13 @@ set -eux
 # SECTION TO BE MODIFIED BY USER
 debug=0
 nmaxproc=6
-sec1=1  #flag to execute section1 (1=yes; 0=no) COMPUTE ENSMEAN
+sec1=0  #flag to execute section1 (1=yes; 0=no) COMPUTE ENSMEAN
 sec2=0  #flag to execute section2 (1=yes; 0=no) COMPUTE PERCENTILES
-sec3=1  #flag to execute section3 (1=yes; 0=no) BIAS
-sec4=1  #flag to execute section4 (1=yes; 0=no) ACC
+sec3=0  #flag to execute section3 (1=yes; 0=no) BIAS
+sec4=0  #flag to execute section4 (1=yes; 0=no) ACC
 #export clim3d="MERRA2"
 export clim3d="ERA5"
-sec5=0  #flag for section5 (=QBO postproc) (1=yes; 0=no)
+sec5=1  #flag for section5 (web page creation)
 machine="juno"
 do_atm=1
 do_lnd=0
@@ -120,8 +120,8 @@ then
 fi
 export units
 export title
-allvars_atmh3="PSL  TREFHT PRECT"
-allvars_atmh2="Z500 T850 U925"
+allvars_atmh3="PSL TREFHT PRECT"
+allvars_atmh2="" #Z500 T850 U925"
 #allvars_atm="TREFMNAV TREFMXAV T850 PRECC ICEFRAC Z500 PSL TREFHT TS PRECT"
 allvars_lnd="SNOWDP FSH TLAI FAREA_BURNED";
 allvars_ice="aice snowfrac ext Tsfc fswup fswdn flwdn flwup congel fbot albsni hi";
@@ -129,14 +129,20 @@ allvars_ice="aice snowfrac ext Tsfc fswup fswdn flwdn flwup congel fbot albsni h
  
     ## NAMELISTS
 tardir=$dirdiag/plots
-for st in 11 #05 07 11
+declare -a nmaxens
+for ic in {0..11}
+do
+   nmaxens[$ic]=0
+done
+for st in 05 07 11
 do
    dirdiagst=/work/$DIVISION/$USER/diagnostics/SPS4_hindcast/$st
    mkdir -p $dirdiagst/scripts
+   ic=$((10#$st - 1))
    case $st in
-      05) nmaxens=13;;
-      07) nmaxens=13;;
-      11) nmaxens=13;;
+      05) nmaxens[$ic]=13;;
+      07) nmaxens[$ic]=13;;
+      11) nmaxens[$ic]=13;;
    esac
    pltdir=$dirdiag/plots/$st
    mkdir -p $pltdir
@@ -146,10 +152,10 @@ do
 
    for yyyy in `seq $iniy_hind $endy_hind`
    do
-     if [[ `ls $DIR_CASES1/${SPSSystem}_${yyyy}${st}_0??/logs/*${nmonfore}months_done|wc -l` -lt $nmaxens ]]
+     if [[ `ls $DIR_CASES1/${SPSSystem}_${yyyy}${st}_0??/logs/*${nmonfore}months_done|wc -l` -lt ${nmaxens[$ic]} ]]
      then 
 # cases transferred from Zeus (DIR_CASES are not transferred)
-        if [[ `ls $DIR_ARCHIVE1/${SPSSystem}_${yyyy}${st}_0??.transfer_from_Zeus_DONE|wc -l` -lt $nmaxens ]]
+        if [[ `ls $DIR_ARCHIVE1/${SPSSystem}_${yyyy}${st}_0??.transfer_from_Zeus_DONE|wc -l` -lt ${nmaxens[$ic]} ]]
         then        
            break
         fi  
@@ -161,7 +167,7 @@ do
    ############################################
    #  First section: postprocessing
    ############################################
-   echo 'NOW MAX ENSEMBLE SET TO '$nmaxens
+   echo 'NOW MAX ENSEMBLE SET TO '${nmaxens[$ic]}
    if [[ $sec1 -eq 1 ]]
    then
       model=CMCC-CM
@@ -179,8 +185,8 @@ do
                atm) realm=cam
                     case $ftype in
                        h1) allvars="minnie";;
-                       h2) allvars="Z500 T850 U010 U250";;
-                       h3) allvars=$allvars_atm;;
+                       h2) allvars=$allvars_atmh2;;
+                       h3) allvars=$allvars_atmh3;;
                     esac
                     ;;
                lnd) allvars=$allvars_lnd; realm=clm2;;
@@ -197,7 +203,7 @@ do
                   then
                      continue
                   fi
-                  $DIR_UTIL/submitcommand.sh -m $machine -q $serialq_l -M 18000 -j compute_ensmean_and_anom_${st}${var} -l ${here}/logs/ -d ${here} -s compute_ensmean_and_anom.sh -i "${nmaxens} ${var} $st $dirdiag $lasty"
+                  $DIR_UTIL/submitcommand.sh -m $machine -q $serialq_l -M 18000 -j compute_ensmean_and_anom_${st}${var} -l ${here}/logs/ -d ${here} -s compute_ensmean_and_anom.sh -i "${nmaxens[$ic]} ${var} $st $dirdiag $lasty"
                done #loop on vars
                while `true`
                do
@@ -235,7 +241,7 @@ do
        for comp in atm
        do
           case $comp in
-            atm)typelist="h3";; # h2 h3";;
+            atm)typelist="h3 h2 h3";;
             lnd)typelist="h0";;
             ice)typelist="h";;
           esac
@@ -245,8 +251,8 @@ do
                atm) realm=cam
                     case $ftype in
                        h1) allvars="minnie";;
-                       h2) allvars="Z500 T850 U010 U250";;
-                       h3) allvars=$allvars_atm;;
+                       h2) allvars=$allvars_atmh2;;
+                       h3) allvars=$allvars_atmh3;;
                     esac
                     ;;
                lnd) allvars=$allvars_lnd; realm=clm2;;
@@ -256,7 +262,7 @@ do
              do
    
                 mkdir -p $dirdiag/$var/PCTL
-                inputm=`ls -tr $dirdiag/$var/ANOM/cam.$ftype.$st.$var.all_anom.${iniy_hind}-????.$nmaxens.nc|tail -1`
+                inputm=`ls -tr $dirdiag/$var/ANOM/cam.$ftype.$st.$var.all_anom.${iniy_hind}-????.${nmaxens[$ic]}.nc|tail -1`
                 $DIR_UTIL/submitcommand.sh -m $machine -q $serialq_l -M 1800 -j compute_percentiles_${st}${var} -l ${here}/logs/ -d ${here} -s make_seasonal_tercile.sh -i "$st ${var} $inputm $dirdiag/$var/PCTL "
    
              done
@@ -274,25 +280,22 @@ do
    for comp in $comps
    do
       case $comp in
-         atm) allvars=$allvars_atm;realm=cam;typelist="h3";;
+         atm) realm=cam;typelist="h2 h3";;
          lnd) allvars=$allvars_lnd;typelist="h0";
              realm=clm2;;
          ice) allvars=$allvars_ice;realm=cice;typelist="h";;
       esac
       for ftype in $typelist
       do
-   #      outnml=$dirdiag/nml
-      # copy locally the namelists
-   #      mkdir -p $outnml
-   #      if [[  `ls $rundir/namelist* |wc -l` -gt 0 ]]
-   #      then
-   #         rsync -auv $rundir/namelist* $outnml
-   #      fi
-   #      if [[  `ls $rundir/file_def*xml |wc -l` -gt 0 ]]
-   #      then
-   #         rsync -auv $rundir/file_def*xml  $outnml
-   #      fi
-      
+         case $comp in
+            atm) realm=cam;
+              case $ftype in
+                  h1) allvars="minnie";;
+                  h2) allvars=$allvars_atmh2;;
+                  h3) allvars=$allvars_atmh3;;
+              esac;;
+        
+         esac
          export varmod
       
          units=""
@@ -300,7 +303,7 @@ do
          ijob=0
          for varmod in $allvars
          do
-            $DIR_UTIL/submitcommand.sh -m $machine -q $serialq_l -M 100 -j compute_BIAS_${st}${varmod} -l ${here}/logs/ -d ${here} -s compute_BIAS.sh -i "$lasty $cmp2obs $pltype $varmod $comp $do_timeseries $do_atm $do_lnd $do_ice $dirdiag $nmaxens $st $cmp2obs $do_anncyc $do_2d_plt $pltdir/bias"
+            $DIR_UTIL/submitcommand.sh -m $machine -q $serialq_l -M 1000 -j compute_BIAS_${st}${varmod} -l ${here}/logs/ -d ${here} -s compute_BIAS.sh -i "$lasty $cmp2obs $pltype $varmod $comp $do_timeseries $do_atm $do_lnd $do_ice $dirdiag ${nmaxens[$ic]} $st $cmp2obs $do_anncyc $do_2d_plt $pltdir/bias"
             while `true`
             do
                ijob=`$DIR_UTIL/findjobs.sh -m $machine -n compute_BIAS -c yes`
@@ -328,7 +331,7 @@ do
        for comp in atm
        do
           case $comp in
-            atm)typelist="h3";; # h2 h3";;
+            atm)typelist="h2 h3";;
             lnd)typelist="h0";;
             ice)typelist="h";;
           esac
@@ -338,8 +341,8 @@ do
                atm) realm=cam
                     case $ftype in
                        h1) allvars="minnie";;
-                       h2) allvars="Z500 T850 U010 U250";;
-                       h3) allvars=$allvars_atm;;
+                       h2) allvars=$allvars_atmh2;;
+                       h3) allvars=$allvars_atmh3;;
                     esac
                     ;;
                lnd) allvars=$allvars_lnd; realm=clm2;;
@@ -349,10 +352,10 @@ do
              do
    
                 mkdir -p $pltdir/acc
-                inputm=`ls -tr $dirdiag/$var/ANOM/cam.$ftype.$st.$var.all_anom.${iniy_hind}-????.$nmaxens.nc|tail -1`
+                inputm=`ls -tr $dirdiag/$var/ANOM/cam.$ftype.$st.$var.all_anom.${iniy_hind}-????.${nmaxens[$ic]}.nc|tail -1`
                 for region in global
                 do
-                   $DIR_UTIL/submitcommand.sh -m $machine -q $serialq_l -M 3000 -j compute_ACC_${st}${var} -l ${here}/logs/ -d ${here} -s compute_ACC.sh -i "$lasty $nmaxens $st $pltdir/acc $var $ftype $dirdiag $region"
+                   $DIR_UTIL/submitcommand.sh -m $machine -q $serialq_l -M 3000 -j compute_ACC_${st}${var} -l ${here}/logs/ -d ${here} -s compute_ACC.sh -i "$lasty ${nmaxens[$ic]} $st $pltdir/acc $var $ftype $dirdiag $region"
                 done
    
              done
@@ -364,3 +367,10 @@ do
    ############################################
 
 done
+if [[ $sec5 -eq 1 ]]
+then
+   cd $here
+   sed -e "s/NENS01/${nmaxens[0]}/g;s/NENS02/${nmaxens[1]}/g;s/NENS03/${nmaxens[2]}/g;s/NENS04/${nmaxens[3]}/g;s/NENS05/${nmaxens[4]}/g;s/NENS06/${nmaxens[5]}/g;s/NENS07/${nmaxens[6]}/g;s/NENS08/${nmaxens[7]}/g;s/NENS09/${nmaxens[8]}/g;s/NENS10/${nmaxens[9]}/g;s/NENS11/${nmaxens[10]}/g;s/NENS12/${nmaxens[11]}/g;" create_plot_web.sh > create_plot_web_now.sh
+   chmod u+x create_plot_web_now.sh
+   $DIR_UTIL/submitcommand.sh -m $machine -q $serialq_l -M 1000 -j create_plot_web -l ${here}/logs/ -d ${here} -s create_plot_web_now.sh 
+fi

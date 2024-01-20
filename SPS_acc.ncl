@@ -260,7 +260,8 @@ begin
 ; open file and read in variable
 ;***********************************************
   write="FALSE"
-  lasty=toint(getenv("lasty"))
+  strlasty=getenv("lasty")
+  lasty=toint(strlasty)
   iniy=toint(getenv("iniy"))
   varm=getenv("varm")
   varo=getenv("varo")
@@ -423,6 +424,7 @@ res2@gsnCenterStringOrthogonalPosF = 0.1
      res2@tiMainFontHeightF = 0.015	
 
   res2@gsnLeftString = "ACC= "+sprintf("%3.2f",accareamean)
+  res2@gsnRightString = "1993-"+strlasty
   res2@gsnLeftStringFontHeightF = 0.01
   res2@gsnLeftStringOrthogonalPosF = 0.1
 

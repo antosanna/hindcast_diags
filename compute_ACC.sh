@@ -26,6 +26,7 @@ export region=$8
 mkdir -p $dirplots
 export pltype=png
 
+# climatologies computed on Zeus /users_home/csp/as34319/diagnostics/hindcast_diags/make_clim_refperiod.sh
 diro=/work/csp/$USER/diagnostics/SPS4_hindcast/OBS/VALIDATION/
 mod=SPS4
 export iniy=$iniy_hind

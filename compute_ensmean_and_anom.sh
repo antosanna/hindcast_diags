@@ -20,7 +20,6 @@ dirdiagstvar=$dirdiag/$st/$var
 dirdiagvar=$dirdiag/$var
 mkdir -p $dirdiagstvar
 cd $dirdiagvar
-#for yyyy in `seq $iniy_hind $endy_hind`
 for yyyy in `seq $iniy_hind $lasty`
 do
 		nens=0
@@ -54,19 +53,19 @@ do
 # monthly mean single variable single caso
 								cdo seltimestep,1/6 -monmean $filevartime $filevarmonmean
         rm $filevar $filevartime
-        fi
-								inpfilelist+=" $filevarmonmean"
-								nens=$(($nens + 1))
-								if [[ $nens -eq $nmaxens ]]
+     fi
+					inpfilelist+=" $filevarmonmean"
+					nens=$(($nens + 1))
+					if [[ $nens -eq $nmaxens ]]
+					then
+								yfilevarensmean=$dirdiagvar/cam.$ftype.$var.$yyyy$st.ensmean.$nmaxens.nc
+								if [[ ! -f $yfilevarensmean ]]
 								then
-											yfilevarensmean=$dirdiagvar/cam.$ftype.$var.$yyyy$st.ensmean.$nmaxens.nc
-											if [[ ! -f $yfilevarensmean ]]
-											then
-														cdo ensmean $inpfilelist $yfilevarensmean
-											fi
-           break
+											cdo ensmean $inpfilelist $yfilevarensmean
 								fi
-					done #loop on ens
+        break
+					fi
+		done #loop on ens
 done #loop on years
 mkdir -p $dirdiagvar/CLIM
 hindclimfile=$dirdiagvar/CLIM/cam.$ftype.$st.$var.clim.$iniy_hind-$lasty.$nmaxens.nc

@@ -3,6 +3,7 @@
 . $DIR_UTIL/descr_CPS.sh 
 . $DIR_UTIL/descr_ensemble.sh 1993 
 . $DIR_UTIL/load_cdo 
+. $DIR_UTIL/load_ncl 
 set -eux  
 # 
 export lasty=${1} 
@@ -28,8 +29,23 @@ export do_anncyc=${14}
 do_2d_plt=${15}
 pltdir=${16}
 mkdir -p $pltdir
-#fi
 # END SECTION TO BE MODIFIED BY USER
+export mon
+case $st
+ in
+ 01)  mon="January" ;;
+ 02)  mon="February" ;;
+ 03)  mon="March" ;;
+ 04)  mon="April" ;;
+ 05)  mon="May" ;;
+ 06)  mon="June" ;;
+ 07)  mon="July" ;;
+ 08)  mon="August" ;;
+ 09)  mon="September" ;;
+ 10)  mon="October" ;;
+ 11)  mon="November" ;;
+ 12)  mon="December" ;;
+esac
 
 mkdir -p $dirdiagst
 export startyear=${iniy_hind}
@@ -180,7 +196,7 @@ case $varmod in
    T850)varobs=T2M;cf=-273.15;units="Celsius deg";obsfile="$dir_obs1";title2="ERA5 $climobs";export maxplot=36;export minplot=-20;delta=4;units_from_here=1;export cmp2obs_ncl=0;;
    TREFMNAV)varobs=T2M;cf=-273.15;units="Celsius deg";obsfile="$dir_obs1";title2="ERA5 $climobs";export maxplot=36;export minplot=-20;delta=4;units_from_here=1;export cmp2obs_ncl=0;;
    TREFMXAV)varobs=T2M;cf=-273.15;units="Celsius deg";obsfile="$dir_obs1/ERA5_1m_clim_1deg_1979-2018_surface.nc";title2="ERA5 $climobs";export maxplot=36;export minplot=-20;delta=4;units_from_here=1;export cmp2obs_ncl=0;;
-   TREFHT)varobs=var167;cf=-273.15;units="Celsius deg";obsfile="$dir_obs1/t2m_ERA5_1m_clim_1993-2016.nc";title2="ERA5 $climobs";export maxplot=36;export minplot=-20;delta=4;units_from_here=1;export cmp2obs_ncl=$cmp2obs;;
+   TREFHT)varobs=var167;cf=-273.15;title="2m Temperature";units="Celsius deg";obsfile="$dir_obs1/t2m_ERA5_1m_clim_1993-2016.nc";title2="ERA5 $climobs";export maxplot=36;export minplot=-20;delta=4;units_from_here=1;export cmp2obs_ncl=$cmp2obs;;
    U010)varobs=var131;units="m/s";obsfile="$dir_obs4/uplev_era5_1979-2018_anncyc.nc";ncl_lev=1;title2="ERA5 $climobs";export maxplot=30.;export minplot=-30.;delta=10.;units_from_here=1;export maxplotdiff=10;export minplotdiff=-10;deltadiff=2.;cmp2obs_anncyc=1;export cmp2obs_ncl=$cmp2obs;;
    U100)varobs=var131;units="m/s";obsfile="$dir_obs4/uplev_era5_1979-2018_anncyc.nc";ncl_lev=2;title2="ERA5 $climobs";export maxplot=30.;export minplot=-30.;delta=10.;units_from_here=1;export maxplotdiff=10;export minplotdiff=-10;deltadiff=2.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;;
    U200)varobs=U;units="m/s";obsfile="$dir_obs1/ERA5_1m_clim_1deg_1979-2018_prlev.nc";ncl_lev=1;title2="ERA5 $climobs";export maxplot=30.;export minplot=-30.;delta=10.;units_from_here=1;export maxplotdiff=10;export minplotdiff=-10;deltadiff=2.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;;

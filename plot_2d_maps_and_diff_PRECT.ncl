@@ -29,19 +29,19 @@ begin
 end
 
 begin
-  name_from_ext=getenv("name_from_here")
-  units_from_ext=getenv("units_from_here")
-  modfile=getenv("inpfile")
-  comp=getenv("comp")
-  cmp2obs=toint(getenv("cmp2obs_ncl"))
-  lead=toint(getenv("lead"))
-  st=toint(getenv("st"))
-  pltname=getenv("pltname")
-  pltype=getenv("pltype")
-  varmod=getenv("varmod")
-  varobs=getenv("varobs")
-  cf=tofloat(getenv("cf"))
-  mf=tofloat(getenv("mf"))
+;  name_from_ext=getenv("name_from_here")
+;  units_from_ext=getenv("units_from_here")
+  modfile="/work/csp/as34319/diagnostics/SPS4_hindcast/PRECT/CLIM/cam.h3.05.PRECT.clim.1993-2002.13.nc"
+  comp="atm"
+  cmp2obs=1
+  lead=0
+  st=5
+  pltname="pippo.png"
+  pltype="x11"
+  varmod="PRECT"
+  varobs="precip"
+  cf=0
+  mf=86400000
   print(mf)
   in = addfile(modfile,"r")
   print("----model file "+modfile)
@@ -63,7 +63,7 @@ begin
   printVarSummary( wgty_mod)
   printVarSummary(tclim)
   if(cmp2obs.eq.1)then
-     obsfile=getenv("obsfile")
+     obsfile="/work/csp/as34319/obs/precip_GPCP_1m_clim_1993-2016.nc"
      print("----observations file "+obsfile)
      in = addfile(obsfile,"r")
      lon  = in->lon
@@ -98,27 +98,15 @@ begin
 ;           delete(tmp)
 ;        end if
 ;     end if
-     if(st-1+lead+2.le.11)then   ;take into account indicing from 0
-        istart=st-1+lead
-        iend=st-1+lead+2
+     if(st+lead+2-1.le.11)then   ;take into account indicing from 0
+        istart=st+lead-1
+        iend=st+lead-1+2
         print("selecting months from obs "+istart+"to "+iend)
-        tobsclim=dim_avg_n(tobs(istart:iend,:,:),0)
+        tobsclim=dim_avg_n(tobs(st+lead-1:st-1+lead+2,:,:),0)
      else
-        ifirst=st+lead-1
-        if(ifirst.gt.11)then
-           ifirst=ifirst-12
-        end if
-        isecond=st+lead
-        if(isecond.gt.11)then
-           isecond=isecond-12
-        end if
-        ilast=st+lead+1
-        if(ilast.gt.11)then
-           ilast=ilast-12
-        end if
-        tobsclim=(tobs(ifirst,:,:)+tobs(isecond,:,:)+tobs(ilast,:,:))/3.
+        tobsclim=(tobs(st+lead-1:st-1+lead,:,:)+tobs(st+lead:st+lead,:,:)+tobs(st+lead+1:st+lead+1,:,:))/3.
      end if
-     if(varmod.eq."TREFHT".or.varmod.eq."TS".or.varmod.eq."TREFMNAV".or.varmod.eq."PSL")then
+     if(varmod.eq."TREFHT".or.varmod.eq."TS".or.varmod.eq."TREFMNAV")then
         tobsclim=(tobsclim+cf)*mf
         copy_VarMeta(tobs(0,:,:),tobsclim)
      end if
@@ -128,17 +116,18 @@ begin
      printMinMax(tobsclim,0)
   end if
 ;---Common definitions
-; other:"amwg" "WhiteBlue" 
-;  cmap=read_colormap_file("gui_default")
-  cmap     = read_colormap_file("amwg") 
-  FillPalette=cmap
-  if(varmod.eq."CLDTOT".or.varmod.eq."CLDLOW".or.varmod.eq."CLDMED".or.varmod.eq."CLDHGH".or.varmod.eq."H2OSNO".or.varmod.eq."SNOWDP".or.varmod.eq."hi".or.varmod.eq."aice")then
-      FillPalette     = read_colormap_file("amwg") 
-  end if
-  if(varmod.eq."PRECT")then
+  cmap= read_colormap_file("gui_default")    ; set color map
+  
+   FillPalette     = cmap
+   if (varmod.eq."PRECT")then
       delete(cmap)
       delete(FillPalette)
-      FillPalette     = read_colormap_file("precip2_17lev")
+      FillPalette= read_colormap_file("precip2_17lev")
+   end if
+;  FillPalette     = read_colormap_file("amwg") 
+  if(varmod.eq."CLDTOT".or.varmod.eq."CLDLOW".or.varmod.eq."CLDMED".or.varmod.eq."CLDHGH".or.varmod.eq."H2OSNO".or.varmod.eq."SNOWDP".or.varmod.eq."hi".or.varmod.eq."aice")then
+      delete(FillPalette)
+      FillPalette     = read_colormap_file("amwg") 
   end if
   if(varmod.eq."H2OSNO".or.varmod.eq."SNOWDP")then
      tclim@_FillValue=-999.
@@ -156,19 +145,19 @@ begin
      OceanFillColor      = "grey"
      MissingValFillColor = "grey"
   end if
-  CenterString = getenv("title1")
+  CenterString = "pippo"
   LeftString   = t@long_name
   RightString   = t@units
 
- if(name_from_ext.eq.1)then
-    delete(LeftString)
-    LeftString=getenv("title")
- end if
- if(units_from_ext.eq.1)then
-    units=getenv("units")
-    delete(RightString)
-    RightString=units
- end if
+; if(name_from_ext.eq.1)then
+;    delete(LeftString)
+;    LeftString=getenv("title")
+; end if
+; if(units_from_ext.eq.1)then
+;    units=getenv("units")
+;    delete(RightString)
+;    RightString=units
+; end if
 
   wks = gsn_open_wks(pltype,pltname)
      plot = new(3,graphic)
@@ -232,9 +221,9 @@ begin
      end if
 
      res@cnLevelSelectionMode = "ManualLevels"; manual set levels so lb consistent
-     res@cnMinLevelValF       = tofloat(getenv("minplot"))             ; min level
-     res@cnMaxLevelValF       = tofloat(getenv("maxplot"))            ; max level
-     res@cnLevelSpacingF      = tofloat(getenv("delta"))             ; contour interval
+     res@cnMinLevelValF       = 2.
+     res@cnMaxLevelValF       = 18.
+     res@cnLevelSpacingF      = 2.
 ;     if(res@cnLevelSpacingF.eq.0.)then
 ;        res@cnMinLevelValF=min(tclim)
 ;        res@cnMaxLevelValF=max(tclim)
@@ -257,9 +246,11 @@ begin
      res@gsnLeftString   = LeftString
      res@gsnRightString   = RightString
 
+     
+;     cmap = read_colormap_file("WhiteBlue")
      plot(0) = gsn_csm_contour_map(wks,tclim, res)
 
-     res@gsnCenterString = getenv("title2")
+     res@gsnCenterString = "pippo2"
      tobsclim!0="lat"
      tobsclim!1="lon"
      tobsclim&lat=lat
@@ -288,37 +279,31 @@ begin
         res@cnLevels     = (/-4.,-2.,-1.5,-1.,-.5,.5,1.,1.5,2,4/)
      else
         res@cnLevelSelectionMode = "ManualLevels"; manual set levels so lb consistent
-        res@cnMinLevelValF       = tofloat(getenv("minplotdiff"))             ; min level
-        res@cnMaxLevelValF       = tofloat(getenv("maxplotdiff"))            ; max level
-        res@cnLevelSpacingF      = tofloat(getenv("deltadiff"))             ; contour interval
+        res@cnMinLevelValF       = -5.
+        res@cnMaxLevelValF       = 5.
+        res@cnLevelSpacingF      = 1.
      end if
      if(varmod.eq."PRECT")then
+;        delete(res@cnFillPalette)
+;        cmap2 = read_colormap_file("hotcold_18lev")
         res@cnFillPalette     = cmap1(::-1,:)
         delete(res@cnLevels)
         res@cnLevelSelectionMode="ExplicitLevels"
         res@cnLevels     = (/-8,-6,-4,-3,-2,-1,-0.5,0.5,1,2,3,4,6,8/)
+;        res@cnMinLevelValF=-5.
+;        res@cnMaxLevelValF=5.
+;        res@cnLevelSpacingF      = 1.
      end if
-;     print(lonmod)
-;     print(latmod)
-;     print(lon)
-;     print(lat)
      if (varmod.eq."FSNT") then
           res@gsnLeftString   = LeftString
      end if
-     if(varobs.eq."precip")then
-        tclim_in_obs = linint2_Wrap (lonmod,latmod,tclim, True, lon,lat, 0)
-        diff=tclim_in_obs-tobsclim
-     else if (varmod.eq."TREFHT") then
-;        tclimflip=lonFlip(tclim)
-;        lonmodflip=where(lonmod.gt.180.,lonmod,lonmod-360)
-        tclim_in_obs = linint2_Wrap (lonmod,latmod,tclim, True, lon,lat(::-1), 0)
-        diff=tclim_in_obs(::-1,:)-tobsclim
-     else 
-        tclim_in_obs = linint2_Wrap (lonmod,latmod,tclim, True, lon,lat, 0)
-        diff=tclim_in_obs-tobsclim
-     end if
-     end if
+;     tclimflip=lonFlip(tclim)
+;     lonmodflip=where(lonmod.gt.180.,lonmod,lonmod-360)
+;     tclim_in_obs = linint2_Wrap (lonmodflip,latmod,tclimflip, True, lon,lat(::-1), 0)
+     tclim_in_obs = linint2_Wrap (lonmod,latmod,tclim, True, lon,lat, 0)
      printMinMax(tclim_in_obs,0)
+     diff=tclim_in_obs-tobsclim
+     printMinMax(diff,0)
      diff!0="lat"
      diff!1="lon"
      diff&lat=lat
@@ -345,8 +330,7 @@ begin
 ; Draw the panel and label bars
 ;****************************************************************************
      resP = True
-     month=getenv("mon")
-     resP@gsnPanelMainString = month+" start-date - lead season "+lead
+     resP@gsnPanelMainString = st+" lead "+lead
      resP@gsnMaximize = True
      resP@gsnFrame    = False
  ;resP@gsnPanelRight  = 0.98
