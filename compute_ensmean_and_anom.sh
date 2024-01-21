@@ -19,7 +19,8 @@ echo 'NOW MAX ENSEMBLE SET TO '$nmaxens
 dirdiagstvar=$dirdiag/$st/$var
 dirdiagvar=$dirdiag/$var
 mkdir -p $dirdiagstvar
-cd $dirdiagvar
+mkdir -p $dirdiagvar
+cd $dirdiagstvar
 for yyyy in `seq $iniy_hind $lasty`
 do
 		nens=0
@@ -80,6 +81,7 @@ then
 fi
 anomdir=$dirdiagstvar/ANOM
 mkdir -p $anomdir
+cd $dirdiagvar
 for yyyy in `seq $iniy_hind $lasty`
 do
    listfull=""
@@ -94,7 +96,7 @@ do
    if [[ ! -f $anomdir/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc ]]
    then
       ncecat $listanom $anomdir/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc
-      ncrename -O -d record,ens $anomdir/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc
+#      ncrename -O -d record,ens $anomdir/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc
    fi
    if [[ ! -f $anomdir/cam.$ftype.$yyyy$st.$var.ens_anom.$iniy_hind-$lasty.$nmaxens.nc ]]
    then
@@ -104,5 +106,5 @@ done
 if [[ ! -f $anomdir/cam.$ftype.$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc ]]
 then
    ncecat  $anomdir/cam.$ftype.????$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc $anomdir/cam.$ftype.$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc
-   ncrename -O -d record,year $anomdir/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc
+   ncrename -O -d record,year $anomdir/cam.$ftype.$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc
 fi

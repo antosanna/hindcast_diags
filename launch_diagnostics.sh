@@ -19,7 +19,7 @@ set -eux
 # SECTION TO BE MODIFIED BY USER
 debug=0
 nmaxproc=6
-sec1=0  #flag to execute section1 (1=yes; 0=no) COMPUTE ENSMEAN
+sec1=1  #flag to execute section1 (1=yes; 0=no) COMPUTE ENSMEAN
 sec2=0  #flag to execute section2 (1=yes; 0=no) COMPUTE PERCENTILES
 sec3=0  #flag to execute section3 (1=yes; 0=no) BIAS
 sec4=0  #flag to execute section4 (1=yes; 0=no) ACC
@@ -120,8 +120,9 @@ then
 fi
 export units
 export title
-allvars_atmh3="PSL TREFHT PRECT"
-allvars_atmh2="" #Z500 T850 U925"
+allvars_atmh3="" #"PSL TREFHT PRECT"
+allvars_atmh2="Z500 T850 U925"
+allvars_atmh1="" #Z500 T850 U925"
 #allvars_atm="TREFMNAV TREFMXAV T850 PRECC ICEFRAC Z500 PSL TREFHT TS PRECT"
 allvars_lnd="SNOWDP FSH TLAI FAREA_BURNED";
 allvars_ice="aice snowfrac ext Tsfc fswup fswdn flwdn flwup congel fbot albsni hi";
@@ -134,7 +135,7 @@ for ic in {0..11}
 do
    nmaxens[$ic]=0
 done
-for st in 05 07 11
+for st in 05 #07 11
 do
    dirdiagst=/work/$DIVISION/$USER/diagnostics/SPS4_hindcast/$st
    mkdir -p $dirdiagst/scripts
@@ -174,7 +175,7 @@ do
       for comp in $comps
       do
          case $comp in
-            atm)typelist="h3";; #"h1 h2 h3"
+            atm)typelist="h1 h2 h3";;
             lnd)typelist="h0";; 
             ice)typelist="h";; 
          esac
@@ -184,7 +185,7 @@ do
             case $comp in
                atm) realm=cam
                     case $ftype in
-                       h1) allvars="minnie";;
+                       h1) allvars=$allvars_atmh1;;
                        h2) allvars=$allvars_atmh2;;
                        h3) allvars=$allvars_atmh3;;
                     esac
@@ -290,7 +291,7 @@ do
          case $comp in
             atm) realm=cam;
               case $ftype in
-                  h1) allvars="minnie";;
+                  h1) allvars=$allvars_atmh1;;
                   h2) allvars=$allvars_atmh2;;
                   h3) allvars=$allvars_atmh3;;
               esac;;
