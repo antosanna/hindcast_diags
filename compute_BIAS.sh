@@ -20,6 +20,7 @@ esac
 export do_timeseries=${6}
 export do_atm=${7}
 export do_lnd=${8}
+export do_ice=${9}
 
 dirdiagst=${10}
 nmaxens=${11}
@@ -28,6 +29,7 @@ export cmp2obs=${13}
 export do_anncyc=${14}
 do_2d_plt=${15}
 pltdir=${16}
+ftype=${17}
 mkdir -p $pltdir
 # END SECTION TO BE MODIFIED BY USER
 export mon
@@ -118,13 +120,6 @@ if [[ $do_timeseries -eq 1 ]]
 then
 for comp in $comp
 do
-      case $comp in
-         atm)typelist="h3";; 
-         lnd)typelist="h0";; 
-         ice)typelist="h";; 
-      esac
-      for ftype in $typelist
-      do
          echo "-----going to postproc $comp"
          case $comp in
    # ALBEDOC
@@ -145,7 +140,6 @@ do
          #ciclo annuo
 #         anncycfilevar=$dirdiagst/${exp}.$realm.$var.$startyear_anncyc-$lasty.anncyc.nc
 #         cdo ymonmean -mergetime $listaf_anncyc $anncycfilevar
-      done
 done #expid
 fi
    
@@ -201,11 +195,13 @@ case $varmod in
    U100)varobs=var131;units="m/s";obsfile="$dir_obs4/uplev_era5_1979-2018_anncyc.nc";ncl_lev=2;title2="ERA5 $climobs";export maxplot=30.;export minplot=-30.;delta=10.;units_from_here=1;export maxplotdiff=10;export minplotdiff=-10;deltadiff=2.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;;
    U200)varobs=U;units="m/s";obsfile="$dir_obs1/ERA5_1m_clim_1deg_1979-2018_prlev.nc";ncl_lev=1;title2="ERA5 $climobs";export maxplot=30.;export minplot=-30.;delta=10.;units_from_here=1;export maxplotdiff=10;export minplotdiff=-10;deltadiff=2.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;;
    U700)varobs=var131;units="m/s";obsfile="$dir_obs4/uplev_era5_1979-2018_anncyc.nc";ncl_lev=4;title2="ERA5 $climobs";export maxplot=30.;export minplot=-30.;delta=10.;units_from_here=1;export maxplotdiff=10;export minplotdiff=-10;deltadiff=2.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;;
+   U925)varobs=var131;units="m/s";obsfile="$dir_obs4/ua_ERA5_1m_clim_${climobs}.nc";ncl_lev=9;title2="ERA5 $climobs";export maxplot=30.;export minplot=-30.;delta=10.;units_from_here=1;export maxplotdiff=10;export minplotdiff=-10;deltadiff=2.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;;
    Z010)varobs=var129;cf=0;units="m";obsfile="$dir_obs4/Zplev_era5_1979-2018_anncyc.nc";ncl_lev=1;title2="ERA5 $climobs";export maxplot=31600.;export minplot=28800;delta=100;units_from_here=1;export maxplotdiff=200;export minplotdiff=-200;deltadiff=20.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;;
    Z100)varobs=var129;cf=0;units="m";obsfile="$dir_obs4/Zplev_era5_1979-2018_anncyc.nc";ncl_lev=2;title2="ERA5 $climobs";export maxplot=16800.;export minplot=15000;delta=100;units_from_here=1;export maxplotdiff=200;export minplotdiff=-200;deltadiff=20.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;;
-   Z500)varobs=Z;cf=0;units="m";obsfile="$dir_obs1/ERA5_1m_clim_1deg_1979-2018_prlev.nc";ncl_lev=3;title2="ERA5 $climobs";export maxplot=5900.;export minplot=4800;delta=100;units_from_here=1;export maxplotdiff=50;export minplotdiff=-50;deltadiff=5.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;;
-   Z700)varobs=var129;cf=0;units="m";obsfile="$dir_obs4/Zplev_era5_1979-2018_anncyc.nc";ncl_lev=4;title2="ERA5 $climobs";export maxplot=3200.;export minplot=2600;delta=100;units_from_here=1;export maxplotdiff=100;export minplotdiff=-100;deltadiff=20.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;;
-   Z850)varobs=Z;cf=0;units="m";obsfile="$dir_obs1/ERA5_1m_clim_1deg_1979-2018_prlev.nc";ncl_lev=5;title2="ERA5 $climobs";export maxplot=1550.;export minplot=1050.;delta=50;units_from_here=1;export maxplotdiff=50.;export minplotdiff=-50;deltadiff=5.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;;
+#   Z500)varobs=Z;cf=0;units="m";obsfile="$dir_obs1/ERA5_1m_clim_1deg_1979-2018_prlev.nc";ncl_lev=3;title2="ERA5 $climobs";export maxplot=5900.;export minplot=4800;delta=100;units_from_here=1;export maxplotdiff=50;export minplotdiff=-50;deltadiff=5.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;;
+   Z500)varobs=var129;units="m";obsfile="$dir_obs1/zg_ERA5_1m_clim_${climobs}.nc";ncl_lev=6;title2="ERA5 $climobs";export maxplot=5900.;export minplot=4800;delta=100;units_from_here=1;export maxplotdiff=50;export minplotdiff=-50;deltadiff=5.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;title="Geopotential height at 500hPa";name_from_here=1;;
+   Z700)varobs=var129;cf=0;units="m";obsfile="$dir_obs4/zg_ERA5_1m_clim_${climobs}.nc";ncl_lev=7;title2="ERA5 $climobs";export maxplot=3200.;export minplot=2600;delta=100;units_from_here=1;export maxplotdiff=100;export minplotdiff=-100;deltadiff=20.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;title="Geopotential height at 700hPa";name_from_here=1;;
+   Z850)varobs=var129;cf=0;units="m";obsfile="$dir_obs1/zg_ERA5_1m_clim_${climobs}.nc";ncl_lev=8;title2="ERA5 $climobs";export maxplot=1550.;export minplot=1050.;delta=50;units_from_here=1;export maxplotdiff=50.;export minplotdiff=-50;deltadiff=5.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;title="Geopotential height at 850hPa";name_from_here=1;;
    TS)varobs=var235;cf=-273.15;units="Celsius deg";obsfile="$dir_obs1/sst_HadISST_1m_clim_1993-2016.nc";export title2="ERA5 $climobs";export maxplot=36;export minplot=-20;delta=4;units_from_here=1;export cmp2obs_ncl=$cmp2obs;;
    PRECT)varobs=precip;mf=86400000;units="mm/d";export maxplot=18;export minplot=2;delta=2.;export maxplotdiff=5.;export minplotdiff=-5.;deltadiff=1.;obsfile="$dir_obs1/precip_GPCP_1m_clim_1993-2016.nc";export title2="GPCP $climobs";title="Total precipitation";units_from_here=1;name_from_here=1;export cmp2obs_ncl=$cmp2obs;;
    PRECC)varobs=var167;mf=86400000;units="mm/d";export maxplot=18;export minplot=2;delta=2.;title="Convective precipitation";units_from_here=1;name_from_here=1;cmp2obs_ncl=0;cmp2obs_anncyc=0;;
@@ -237,13 +233,6 @@ if [[ $do_2d_plt -eq 1 ]]
 then
    for comp in $comp
    do
-      case $comp in
-         atm)typelist="h3";; 
-         lnd)typelist="h0";; 
-         ice)typelist="h";; 
-      esac
-      for ftype in $typelist
-      do
          echo "---now plotting 2d $varmod"
          export inpfile=$dirdiagst/$varmod/CLIM/${realm}.$ftype.$st.$varmod.clim.$startyear-${lasty}.$nmaxens.nc
          if [[ ! -f $inpfile ]]
@@ -266,7 +255,6 @@ then
                exit
             fi  
          done
-      done
    done
 fi   # end 2d maps
 if [[ $do_anncyc -eq 1 ]]
@@ -348,6 +336,7 @@ then
       exit
    fi
 fi   # end annual cycle
+do_znl_atm2d=0
 if [[ $do_znl_atm2d -eq 1 ]]
 then
    if [[ $comp == "atm" ]]
@@ -387,6 +376,7 @@ then
       done
    fi
 fi
+do_znl_lnd=0
 if [[ $do_znl_lnd -eq 1 ]]
 then
    if [[ $comp == "lnd" ]]

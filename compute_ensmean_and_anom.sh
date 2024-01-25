@@ -96,7 +96,7 @@ do
    if [[ ! -f $anomdir/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc ]]
    then
       ncecat $listanom $anomdir/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc
-#      ncrename -O -d record,ens $anomdir/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc
+      ncrename -O -d record,ens $anomdir/cam.$ftype.$yyyy$st.$var.all_anom.$iniy_hind-$lasty.$nmaxens.nc
    fi
    if [[ ! -f $anomdir/cam.$ftype.$yyyy$st.$var.ens_anom.$iniy_hind-$lasty.$nmaxens.nc ]]
    then

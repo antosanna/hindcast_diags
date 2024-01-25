@@ -21,8 +21,8 @@ debug=0
 nmaxproc=6
 sec1=1  #flag to execute section1 (1=yes; 0=no) COMPUTE ENSMEAN
 sec2=0  #flag to execute section2 (1=yes; 0=no) COMPUTE PERCENTILES
-sec3=0  #flag to execute section3 (1=yes; 0=no) BIAS
-sec4=0  #flag to execute section4 (1=yes; 0=no) ACC
+sec3=1  #flag to execute section3 (1=yes; 0=no) BIAS
+sec4=1  #flag to execute section4 (1=yes; 0=no) ACC
 #export clim3d="MERRA2"
 export clim3d="ERA5"
 sec5=1  #flag for section5 (web page creation)
@@ -120,9 +120,9 @@ then
 fi
 export units
 export title
-allvars_atmh3="" #"PSL TREFHT PRECT"
-allvars_atmh2="Z500 T850 U925"
-allvars_atmh1="" #Z500 T850 U925"
+allvars_atmh3="" #"TS PSL TREFHT PRECT"
+allvars_atmh2="U925" #Z500 U925" # T850 U925"
+allvars_atmh1="" #
 #allvars_atm="TREFMNAV TREFMXAV T850 PRECC ICEFRAC Z500 PSL TREFHT TS PRECT"
 allvars_lnd="SNOWDP FSH TLAI FAREA_BURNED";
 allvars_ice="aice snowfrac ext Tsfc fswup fswdn flwdn flwup congel fbot albsni hi";
@@ -135,7 +135,7 @@ for ic in {0..11}
 do
    nmaxens[$ic]=0
 done
-for st in 05 #07 11
+for st in 05 07 11
 do
    dirdiagst=/work/$DIVISION/$USER/diagnostics/SPS4_hindcast/$st
    mkdir -p $dirdiagst/scripts
@@ -199,7 +199,7 @@ do
                for var in $allvars
                do
    
-                  isrunning=`$DIR_UTIL/findjobs.sh -n ensmean_${yyyy}${st}${var} -c yes`
+                  isrunning=`$DIR_UTIL/findjobs.sh -n compute_ensmean_and_anom_${st}${var} -c yes`
                   if [[ $isrunning -ne 0 ]]
                   then
                      continue
@@ -208,7 +208,7 @@ do
                done #loop on vars
                while `true`
                do
-                  ijob=`$DIR_UTIL/findjobs.sh -m $machine -n compute_ensmean_ -c yes`
+                  ijob=`$DIR_UTIL/findjobs.sh -m $machine -n compute_ensmean_and_anom_${st} -c yes`
                   if [[ $ijob -gt $nmaxproc ]]
                   then
                      sleep 45
@@ -223,7 +223,7 @@ do
    fi # end of section 1
    while `true`
    do
-          ijob=`$DIR_UTIL/findjobs.sh -m $machine -n compute_ensmean_ -c yes`
+          ijob=`$DIR_UTIL/findjobs.sh -m $machine -n compute_ensmean_and_anom_${st} -c yes`
           if [[ $ijob -ne 0 ]]
           then
              sleep 45
@@ -304,10 +304,15 @@ do
          ijob=0
          for varmod in $allvars
          do
-            $DIR_UTIL/submitcommand.sh -m $machine -q $serialq_l -M 1000 -j compute_BIAS_${st}${varmod} -l ${here}/logs/ -d ${here} -s compute_BIAS.sh -i "$lasty $cmp2obs $pltype $varmod $comp $do_timeseries $do_atm $do_lnd $do_ice $dirdiag ${nmaxens[$ic]} $st $cmp2obs $do_anncyc $do_2d_plt $pltdir/bias"
+            if [[ $debug -eq 0 ]]
+            then
+               $DIR_UTIL/submitcommand.sh -m $machine -q $serialq_l -M 1000 -j compute_BIAS_${st}${varmod} -l ${here}/logs/ -d ${here} -s compute_BIAS.sh -i "$lasty $cmp2obs $pltype $varmod $comp $do_timeseries $do_atm $do_lnd $do_ice $dirdiag ${nmaxens[$ic]} $st $cmp2obs $do_anncyc $do_2d_plt $pltdir/bias $ftype"
+            else
+            ${here}/compute_BIAS.sh $lasty $cmp2obs $pltype $varmod $comp $do_timeseries $do_atm $do_lnd $do_ice $dirdiag ${nmaxens[$ic]} $st $cmp2obs $do_anncyc $do_2d_plt $pltdir/bias $ftype
+            fi
             while `true`
             do
-               ijob=`$DIR_UTIL/findjobs.sh -m $machine -n compute_BIAS -c yes`
+               ijob=`$DIR_UTIL/findjobs.sh -m $machine -n compute_BIAS_${st} -c yes`
                if [[ $ijob -gt $nmaxproc ]]
                then
                   sleep 45

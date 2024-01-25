@@ -77,19 +77,20 @@ begin
 ;        tobs  = -(in->$varobs$(:,::-1,:)) ; different sign convention for longwave radiation btw era5 and cam
 ;        lat  = in->lat(::-1)
 ;     end if
-;     if (varobs.eq."Z" .or. varobs.eq."U".or.varobs.eq."var131".or.varobs.eq."var129")then
-;        lev=toint(getenv("ncl_lev"))
-;        print("level index "+lev)
-;        tobs  = in->$varobs$(:,lev,:,:)
-;        if (varobs.eq."var131".or.varobs.eq."var129")then
-;           lat  = in->lat(::-1)
-;           tobs  = in->$varobs$(:,lev,::-1,:)
-;           if (varobs.eq."var129")then
-;              tmp=tobs/9.8065
-;              copy_VarMeta(tobs,tmp)
-;              tobs=tmp
-;           end if
-;        end if
+     if (varobs.eq."Z" .or. varobs.eq."U".or.varobs.eq."var131".or.varobs.eq."var129")then
+        delete(tobs)
+        lev=toint(getenv("ncl_lev"))
+        print("level index "+lev)
+        tobs  = in->$varobs$(:,lev,:,:)
+        if (varobs.eq."var131".or.varobs.eq."var129")then
+           lat  = in->lat(::-1)
+           tobs  = in->$varobs$(:,lev,::-1,:)
+           if (varobs.eq."var129")then
+              tmp=tobs/9.8065
+              copy_VarMeta(tobs,tmp)
+              tobs=tmp
+           end if
+        end if
 ;        if (varobs.eq."Z")then
 ;           tmp=tobs*100
 ;           copy_VarMeta(tobs,tmp)
@@ -97,7 +98,7 @@ begin
 ;           printMinMax(tobs,0)
 ;           delete(tmp)
 ;        end if
-;     end if
+     end if
      if(st-1+lead+2.le.11)then   ;take into account indicing from 0
         istart=st-1+lead
         iend=st-1+lead+2

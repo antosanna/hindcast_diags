@@ -70,11 +70,16 @@ end do
 
 printVarSummary(NAO_mod)
 NAO_mod_reshape=reshape(NAO_mod,(/ny*nt/))
+nyplot=ny+1
+NAO_mod_plot=new((/(nyplot)*nt/),typeof(NAO_mod_reshape))
+
+NAO_mod_plot(toint(st)-1:ny*nt+toint(st)-2)=NAO_mod_reshape
 ;NAO_mod_runavg=runave_n_Wrap(NAO_mod_reshape,3,0,0)
 
 ; ---- Load Observation files
 varfo="var151"
-year_obs=ispan(tstart,tend,1)
+tendobs   = tstart+nyplot-1
+year_obs=ispan(tstart,tendobs,1)
 anno_obs=sprinti("%0.4i", year_obs)
 pathfile_obs="/work/csp/ab00920/ERA5/monthly/mslp/"
 all_fileo=pathfile_obs+"mslp_era5_"+anno_obs+".nc"
@@ -95,7 +100,7 @@ nlono=NNO(3)
 
 mslpobs_clim=dim_avg_n_Wrap(mslptmp_obs,0)
 mslpOBS=mslptmp_obs
-do y=0,ny-1
+do y=0,nyo-1
    mslpOBS(y,:,:,:)=mslptmp_obs(y,:,:,:)-mslpobs_clim
 end do
 
@@ -106,18 +111,18 @@ stdmslpOBS=dim_stddev_n_Wrap(mslpOBS,0)
 ; compute the 3 NAOI for observations
 ;=====================================================
 NAO_obs=mslpOBS(:,:,0,0)
-do y=0,ny-1
+do y=0,nyo-1
    NAO_obs(y,:)  = dim_avg_n(dim_avg_n(mslpOBS(y,:,{inilatposi:endlatposi},{inilon:endlon})/stdmslpOBS(:,{inilatposi:endlatposi},{inilon:endlon}),1),1)-dim_avg_n(dim_avg_n(mslpOBS(y,:,{inilatnega:endlatnega},{inilon:endlon})/stdmslpOBS(:,{inilatnega:endlatnega},{inilon:endlon}),1),1)
 end do
 
-NAO_obs_reshape=reshape(NAO_obs,(/ny*nt/))
+NAO_obs_reshape=reshape(NAO_obs,(/nyo*nt/))
 
 time=new((/ny*nt/),"float",-999)
 do t=0,(ny*nt)-1
    time(t)=t
 end do
 
-yyyymm   = yyyymm_time(tstart, tend, "integer")
+yyyymm   = yyyymm_time(tstart, tendobs, "integer")
 yyyyfrac = yyyymm_to_yyyyfrac(yyyymm,0)   ; create fractional years for
 
 
@@ -131,8 +136,8 @@ res = True
 res@gsnDraw               = False             ; don't draw yet
 res@gsnFrame              = False
 res@gsnMaximize           = True
-res@trYMinF                  = -3.5
-res@trYMaxF                  = 3.5
+res@trYMinF                  = -4.
+res@trYMaxF                  = 4.
 res@tiMainFontHeightF        = 0.023
 res@tiMainString             = ""
 res@tmXTBorderOn             = True
@@ -152,15 +157,13 @@ res@tmXBLabelDeltaF          = 1
 res@tmXBLabelFontHeightF     = 0.015
 res@tmXBLabelAngleF          = 90
 res@tmXBLabelJust            = "CenterCenter"
-res@trXMinF =1993
-res@trXMaxF =2004
-res@tmXBMode   = "Explicit"
-;res@tmXBValues = "f"     ; choo
+res@tmXBFormat = "f"
+res@trXMinF = 1993
 
 res@xyLineColor     = "Black"
 res@xyLineThicknessF= 4
 
-plot = gsn_csm_xy (wks,yyyyfrac,NAO_mod_reshape,res)
+plot = gsn_csm_xy (wks,yyyyfrac,NAO_mod_plot,res)
 res@xyLineColor     = "Red"
 res@xyLineThicknessF= 2
 plot2 = gsn_csm_xy (wks,yyyyfrac,NAO_obs_reshape,res)
