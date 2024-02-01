@@ -30,9 +30,18 @@ nmaxens=0
 for st in {01..12}
 do
    case $st in
-      05) nmaxens=13;;
-      07) nmaxens=0;;
-      11) nmaxens=0;;
+      01) nmaxens=0;;
+      02) nmaxens=0;;
+      03) nmaxens=0;;
+      04) nmaxens=0;;
+      05) nmaxens=10;;
+      06) nmaxens=0;;
+      07) nmaxens=10;;
+      08) nmaxens=10;;
+      09) nmaxens=0;;
+      10) nmaxens=10;;
+      11) nmaxens=10;;
+      12) nmaxens=0;;
    esac
    if [[ $nmaxens -eq 0 ]]
    then

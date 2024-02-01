@@ -344,6 +344,8 @@ opt=1
   accareamean=wgt_areaave(acct2m, clat, 1.0, 0)
   print(accareamean)
   print("Ho calcolato ACC")
+;  accareameanIndia=wgt_areaave(acct2m(lat|6:40,lon|70:90), clat, 1.0, 0)
+;  print(accareameanIndia)
 
 ; copy meta data and coordinate variables using contributed functions
   copy_VarMeta(varmod(0,:,:), acct2m)        

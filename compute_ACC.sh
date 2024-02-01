@@ -8,6 +8,7 @@
 . $DIR_UTIL/load_nco
 . $DIR_UTIL/load_cdo
 . $DIR_UTIL/load_ncl
+. ~/.bashrc
 module load intel-2021.6.0/cdo-threadsafe/2.1.1-lyjsw
 set -euvx
 
