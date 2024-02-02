@@ -29,10 +29,7 @@ do
 		do
 					caso=${SPSSystem}_${yyyy}${st}_${ens}
 					inpfile=$DIR_ARCHIVE1/$caso/$comp/hist/$caso.cam.$ftype.$yyyy-$st-01-00000.nc
-     set +euvx
-     . $dictionary
-     set -euvx
-					if [[ ! -f $check_6months_done ]]
+					if [[ ! -f $DIR_CASES1/$caso/logs/${caso}_${nmonfore}months_done ]]
 					then 
 # cases transferred from Zeus (DIR_CASES are not transferred)
         if [[ ! -f $DIR_ARCHIVE1/${caso}.transfer_from_Zeus_DONE ]]

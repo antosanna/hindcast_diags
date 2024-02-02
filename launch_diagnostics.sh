@@ -150,9 +150,14 @@ do
    esac
    pltdir=$dirdiag/plots/$st
    mkdir -p $pltdir
-   mkdir -p $pltdir/bias
-   mkdir -p $pltdir/acc
-   mkdir -p $pltdir/roc
+   for dd in bias roc acc
+   do
+      if [[ `ls $pltdir/$dd/* |wc -l` -ne 0 ]]
+      then
+         rm $pltdir/$dd/*
+      fi
+      mkdir -p $pltdir/$dd
+   done
 
    for yyyy in `seq $iniy_hind $endy_hind`
    do

@@ -36,11 +36,11 @@ do
       04) nmaxens=0;;
       05) nmaxens=10;;
       06) nmaxens=0;;
-      07) nmaxens=10;;
-      08) nmaxens=10;;
+      07) nmaxens=15;;
+      08) nmaxens=14;;
       09) nmaxens=0;;
-      10) nmaxens=10;;
-      11) nmaxens=10;;
+      10) nmaxens=13;;
+      11) nmaxens=13;;
       12) nmaxens=0;;
    esac
    if [[ $nmaxens -eq 0 ]]
