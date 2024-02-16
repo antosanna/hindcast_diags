@@ -77,14 +77,14 @@ begin
 ;        tobs  = -(in->$varobs$(:,::-1,:)) ; different sign convention for longwave radiation btw era5 and cam
 ;        lat  = in->lat(::-1)
 ;     end if
-     if (varobs.eq."Z" .or. varobs.eq."U".or.varobs.eq."var131".or.varobs.eq."var129")then
+     if (varobs.eq."var130" .or. varobs.eq."var131".or.varobs.eq."var129")then
         delete(tobs)
         lev=toint(getenv("ncl_lev"))
         print("level index "+lev)
-        tobs  = in->$varobs$(:,lev,:,:)
+        tobs  = rm_single_dims(in->$varobs$(:,lev,:,:))
         if (varobs.eq."var131".or.varobs.eq."var129")then
            lat  = in->lat(::-1)
-           tobs  = in->$varobs$(:,lev,::-1,:)
+           tobs  = rm_single_dims(in->$varobs$(:,lev,::-1,:))
            if (varobs.eq."var129")then
               tmp=tobs/9.8065
               copy_VarMeta(tobs,tmp)

@@ -11,6 +11,7 @@
 . $DIR_UTIL/descr_ensemble.sh 1993
 . $DIR_UTIL/load_cdo
 set -eux  
+here=$PWD
 # SECTION TO BE MODIFIED BY USER
 cam_nlev1=83
 core1=FV
@@ -36,11 +37,11 @@ do
       04) nmaxens=0;;
       05) nmaxens=10;;
       06) nmaxens=0;;
-      07) nmaxens=15;;
+      07) nmaxens=13;;
       08) nmaxens=14;;
       09) nmaxens=0;;
       10) nmaxens=13;;
-      11) nmaxens=13;;
+      11) nmaxens=11;;
       12) nmaxens=0;;
    esac
    if [[ $nmaxens -eq 0 ]]
@@ -82,9 +83,10 @@ do
    sed -i "s/DUMMYCLIM/$startyear-${endy_hind}/g;s/nmaxens$st/$nmaxens/g;s/DUMMYEXPID/$SPSSystem/g;s/lasty$st/$lasty/g;s/biaslist/"$bias"/g;s/acclist/"$acc"/g;s/roclist/"$roc"/g" $tardir/index.html 
 done
 
-cd $tardir
+$here/copy2ftp.sh
+#cd $tardir
 
 
-tar -cvf $SPSSystem.hindcast.VSobs.tar ??/bias ??/acc ??/roc index.html
-gzip -f $SPSSystem.hindcast.VSobs.tar
+#tar -cvf $SPSSystem.hindcast.VSobs.tar ??/bias ??/acc ??/roc index.html
+#gzip -f $SPSSystem.hindcast.VSobs.tar
 

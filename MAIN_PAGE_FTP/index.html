@@ -1,0 +1,188 @@
+<html>
+
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<style>
+body {
+  font-family: "Lato", sans-serif;
+}
+
+/* Fixed sidenav, full height */
+.sidenav {
+  height: 100%;
+  width: 250px;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: Gainsboro;
+  overflow-x: hidden;
+  padding-top: 20px;
+}
+
+/* Style the sidenav links and the dropdown button */
+.sidenav a, .dropdown-btn {
+  padding: 6px 8px 6px 16px;
+  text-decoration: none;
+  font-size: 24px;
+  color: #273746;
+  display: block;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+}
+
+/* On mouse-over */
+.sidenav a:hover, .dropdown-btn:hover {
+  background-color: #AED6F1;
+  color: #273746;
+}
+
+/* Add an active class to the active dropdown button */
+.active {
+  background-color: #1B4F72 ;
+  color: white;
+}
+
+/* Dropdown container (hidden by default). Optional: add a lighter background color and some left padding to change the design of the dropdown content */
+.dropdown-container {
+  display: none;
+  background-color: Gainsboro;
+  padding-left: 8px;
+}
+
+/* Optional: Style the caret down icon */
+.fa-caret-down {
+  float: right;
+  padding-right: 8px;
+}
+
+/* Some media queries for responsiveness */
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+
+
+/*  Frame divisor to visualize content */
+.theframe {
+  margin-left: 250px; /* Same as the width of the sidenav */
+  font-size: 20px; /* Increased text to enable scrolling */
+  padding: 0px 10px;
+  background-size: cover;
+}
+
+/* Initial welcome text */
+.welcome-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-40%, -30%);
+  font-size: 100px;
+  color: white;
+  width: 60%;
+}
+
+.box{
+   float : left;
+   margin: 5px;
+   text-align: center;
+}
+
+.pics {
+  border : 0px   ;
+  width  : 40% ;
+}
+
+
+</style>
+
+</head>
+
+
+<body>
+<!-- Experiments list in sidebar -->
+<div class="sidenav">
+  <!-- Project -->
+  <a href="#" style="color: #BA4A00; background-color: white; font-size: 35px;"><strong>CMCC-CPS1</strong></a>
+  <!-- Model -->
+  <button class="dropdown-btn"><strong>CMCC-SPS4</strong> 
+    <i class="fa fa-caret-down"></i>
+  </button>
+  <!-- Experimentd -->
+  <div class="dropdown-container">
+    <a onclick='loadExp("./new_clim/index.html")'>SPS4-new reference climate</a>
+    <a onclick='loadExp("./old_clim/index.html")'>SPS4-old reference climate</a>
+    <button class="dropdown-btn">Hindcast status
+       <i class="fa fa-caret-down"></i>
+    </button>
+       <div class="dropdown-container">
+       <a style="font-size: 22px;" onclick='loadExp("./HSTATUS/sps4_hindcast_list.htm")'>production status</a>
+       <a style="font-size: 22px;" onclick='loadExp("./HSTATUS/sps4_hindcast_IC_CAM_list.htm")'>IC CAM list</a>
+       <a style="font-size: 22px;" onclick='loadExp("./HSTATUS/sps4_hindcast_IC_NEMO_list.htm")'>IC NEMO list</a>
+       <a style="font-size: 22px;" onclick='loadExp("./HSTATUS/members_on_Zeus.htm")'>members running on Zeus</a>
+       </div>
+  </div>
+
+
+</div>
+
+<!-- container to visualize experiments -->
+<div class="theframe" id="expframe">
+  <img src="CMCC_Background_v1_Normal-01.png" alt="cmcc-background" style="width:100%;">
+  <div class="welcome-text">Diagnostics and </br> hindcast status of </br> CMCC-CPS1</div>
+</div>
+
+
+<!-- Javascript functions -->
+
+<script>
+/* Loop through all dropdown buttons to toggle between hiding and showing its dropdown content - This allows the user to have multiple dropdowns without any conflict */
+var dropdown = document.getElementsByClassName("dropdown-btn");
+var i;
+
+for (i = 0; i < dropdown.length; i++) {
+  dropdown[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var dropdownContent = this.nextElementSibling;
+    if (dropdownContent.style.display === "block") {
+      dropdownContent.style.display = "none";
+    } else {
+      dropdownContent.style.display = "block";
+    }
+  });
+}
+</script>
+
+<script>
+/* Load experiment index page into divisor "expframe" */
+function loadExp(exppath) {
+     document.getElementById("expframe").innerHTML='<object type="text/html" data="' + exppath + '" style="width: 100% ; height: 100%"></object>';
+}
+/* Show ECS and TCR computed for the model */
+function showEcsTcr(sourceid) {
+     var TS='';
+     TS+='<div class=box>';
+
+     TS+='<div class=box> <h3 style="background-color:#f0f0f0;"> ECS : equilibrium climate sensitivity </h3>';
+     TS+='<a href="./'+sourceid+'/'+sourceid+'_ECS_4xCO2.png"> <img class=pics src="./'+sourceid+'/'+sourceid+'_ECS_4xCO2.png"/> </a>';
+     TS+='</div>';
+
+     TS+='<div class=box> <h3 style="background-color:#f0f0f0;"> TCR : transient climate response</h3>';
+     TS+='<a href="./'+sourceid+'/'+sourceid+'_TCR_1pctCO2.png"> <img class=pics src="./'+sourceid+'/'+sourceid+'_TCR_1pctCO2.png"/> </a>';
+     TS+='</div>';
+
+     TS+='</div>';
+
+     document.getElementById("expframe").innerHTML=TS;
+}
+</script>
+
+</body>
+</html>
+

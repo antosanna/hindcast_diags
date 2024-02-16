@@ -6,6 +6,7 @@
 #BSUB -o logs/launch_diagnostics_parallel_%J.out
 #BSUB -q s_medium
 
+# climatologies computed on Zeus /users_home/csp/as34319/diagnostics/hindcast_diags/make_clim_refperiod.sh
 #ALBEDO=(FSUTOA)/SOLIN  [ con SOLIN=FSUTOA+FSNTOA]
 #https://atmos.uw.edu/~jtwedt/GeoEng/CAM_Diagnostics/rcp8_5GHGrem-b40.20th.track1.1deg.006/set5_6/set5_ANN_FLNT_c.png
 #LAI
@@ -121,7 +122,7 @@ fi
 export units
 export title
 allvars_atmh3="TS PSL TREFHT PRECT"
-allvars_atmh2="" #U925" #Z500 U925" # T850 U925"
+allvars_atmh2="Z500 U200 T850 T700 U925" # T850 U925"
 allvars_atmh1="" #
 #allvars_atm="TREFMNAV TREFMXAV T850 PRECC ICEFRAC Z500 PSL TREFHT TS PRECT"
 allvars_lnd="SNOWDP FSH TLAI FAREA_BURNED";
@@ -135,27 +136,22 @@ for ic in {0..11}
 do
    nmaxens[$ic]=0
 done
-#for st in 05 07 11
-for st in 08 05 11 07 10
+for st in 05 10 08 11 07 
 do
    dirdiagst=/work/$DIVISION/$USER/diagnostics/SPS4_hindcast/$st
    mkdir -p $dirdiagst/scripts
    ic=$((10#$st - 1))
    case $st in
       05) nmaxens[$ic]=10;;
-      07) nmaxens[$ic]=15;;
+      07) nmaxens[$ic]=13;;
       08) nmaxens[$ic]=14;;
       10) nmaxens[$ic]=13;;
-      11) nmaxens[$ic]=13;;
+      11) nmaxens[$ic]=11;;
    esac
    pltdir=$dirdiag/plots/$st
    mkdir -p $pltdir
    for dd in bias roc acc
    do
-      if [[ `ls $pltdir/$dd/* |wc -l` -ne 0 ]]
-      then
-         rm $pltdir/$dd/*
-      fi
       mkdir -p $pltdir/$dd
    done
 
@@ -250,7 +246,7 @@ do
        for comp in atm
        do
           case $comp in
-            atm)typelist="h3 h2 h3";;
+            atm)typelist="h1 h2 h3";;
             lnd)typelist="h0";;
             ice)typelist="h";;
           esac
@@ -259,7 +255,7 @@ do
              case $comp in
                atm) realm=cam
                     case $ftype in
-                       h1) allvars="minnie";;
+                       h1) allvars=$allvars_atmh1;;
                        h2) allvars=$allvars_atmh2;;
                        h3) allvars=$allvars_atmh3;;
                     esac
@@ -289,7 +285,7 @@ do
    for comp in $comps
    do
       case $comp in
-         atm) realm=cam;typelist="h2 h3";;
+         atm) realm=cam;typelist="h1 h2 h3";;
          lnd) allvars=$allvars_lnd;typelist="h0";
              realm=clm2;;
          ice) allvars=$allvars_ice;realm=cice;typelist="h";;
@@ -312,6 +308,10 @@ do
          ijob=0
          for varmod in $allvars
          do
+            if [[ `ls $pltdir/bias/*${varmod}*|wc -l` -ne 0 ]]
+            then
+               rm $pltdir/bias/*${varmod}*
+            fi
             if [[ $debug -eq 0 ]]
             then
                $DIR_UTIL/submitcommand.sh -m $machine -q $serialq_l -M 1000 -j compute_BIAS_${st}${varmod} -l ${here}/logs/ -d ${here} -s compute_BIAS.sh -i "$lasty $cmp2obs $pltype $varmod $comp $do_timeseries $do_atm $do_lnd $do_ice $dirdiag ${nmaxens[$ic]} $st $cmp2obs $do_anncyc $do_2d_plt $pltdir/bias $ftype"
@@ -354,7 +354,7 @@ do
              case $comp in
                atm) realm=cam
                     case $ftype in
-                       h1) allvars="minnie";;
+                       h1) allvars=$allvars_atmh1;;
                        h2) allvars=$allvars_atmh2;;
                        h3) allvars=$allvars_atmh3;;
                     esac
@@ -364,6 +364,10 @@ do
              esac
              for var in $allvars
              do
+                if [[ `ls $pltdir/acc/*${var}*|wc -l` -ne 0 ]]
+                then
+                   rm $pltdir/acc/*${var}*
+                fi
    
                 mkdir -p $pltdir/acc
                 inputm=`ls -tr $dirdiag/$var/ANOM/cam.$ftype.$st.$var.all_anom.${iniy_hind}-????.${nmaxens[$ic]}.nc|tail -1`

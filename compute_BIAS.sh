@@ -6,6 +6,7 @@
 . $DIR_UTIL/load_ncl 
 set -eux  
 # 
+# climatologies computed on Zeus /users_home/csp/as34319/diagnostics/hindcast_diags/make_clim_refperiod.sh
 export lasty=${1} 
 # select if you compare to model or obs 
 export cmp2obs=${2}
@@ -56,11 +57,12 @@ export varobs
 export cmp2obstimeseries=0
 i=1
 export expname1=$SPSSystem
+export climobs=1993-2016
 if [[ $machine == "juno" ]]
 then
    export dir_lsm=/work/csp/as34319/CMCC-SPS3.5/regrid_files/
    dir_obs1=/work/csp/as34319/obs
-   dir_obs2=$dir_obs1/ERA5
+   dir_obs2=$dir_obs1/C3S_${climobs}
    dir_obs3=/work/csp/mb16318/obs/ERA5
    dir_obs4=/work/csp/as34319/obs/ERA5
    dir_obs5=/work/csp/as34319/obs
@@ -76,7 +78,6 @@ then
    dir_obs4=/work/csp/as34319/obs/ERA5
    dir_obs5=/work/csp/as34319/obs/
 fi
-export climobs=1993-2016
 export iniclim=$startyear
 
 #
@@ -187,25 +188,24 @@ case $varmod in
    H2OSOI) title="Volumetric Soil Water at 1.36m";name_from_here=1;export cmp2obs_ncl=$cmp2obs;;
    ICEFRAC)cf=0;units="frac";obsfile="";export cmp2obs_ncl=0;cmp2obs_anncyc=0;title2="ERA5 $climobs";export maxplot=0.95;export minplot=0.15;delta=.05;units_from_here=0; title="Sea-Ice Fraction";name_from_here=1;minplotdiff=-0.5;maxplotdiff=0.5;deltadiff=0.05;;
    H2OSNO)varobs=sd; title="Snow Depth (liquid water)";varobs=var167;mf=0.01;export maxplot=10;export minplot=0.5;delta=0.5;units_from_here=1;units="m";name_from_here=1;export cmp2obs_ncl=$cmp2obs;;
-   T850)varobs=T2M;cf=-273.15;units="Celsius deg";obsfile="$dir_obs1";title2="ERA5 $climobs";export maxplot=36;export minplot=-20;delta=4;units_from_here=1;export cmp2obs_ncl=0;;
+   T850)varobs=T2M;cf=-273.15;units="Celsius deg";obsfile="$dir_obs1/ta_ERA5_1m_clim_${climobs}.nc";ncl_lev=9;title2="ERA5 $climobs";export maxplot=36;export minplot=-20;delta=4;units_from_here=1;export cmp2obs_ncl=0;;
    TREFMNAV)varobs=T2M;cf=-273.15;units="Celsius deg";obsfile="$dir_obs1";title2="ERA5 $climobs";export maxplot=36;export minplot=-20;delta=4;units_from_here=1;export cmp2obs_ncl=0;;
    TREFMXAV)varobs=T2M;cf=-273.15;units="Celsius deg";obsfile="$dir_obs1/ERA5_1m_clim_1deg_1979-2018_surface.nc";title2="ERA5 $climobs";export maxplot=36;export minplot=-20;delta=4;units_from_here=1;export cmp2obs_ncl=0;;
-   TREFHT)varobs=var167;cf=-273.15;title="2m Temperature";units="Celsius deg";obsfile="$dir_obs1/t2m_ERA5_1m_clim_1993-2016.nc";title2="ERA5 $climobs";export maxplot=36;export minplot=-20;delta=4;units_from_here=1;export cmp2obs_ncl=$cmp2obs;;
-   U010)varobs=var131;units="m/s";obsfile="$dir_obs4/uplev_era5_1979-2018_anncyc.nc";ncl_lev=1;title2="ERA5 $climobs";export maxplot=30.;export minplot=-30.;delta=10.;units_from_here=1;export maxplotdiff=10;export minplotdiff=-10;deltadiff=2.;cmp2obs_anncyc=1;export cmp2obs_ncl=$cmp2obs;;
-   U100)varobs=var131;units="m/s";obsfile="$dir_obs4/uplev_era5_1979-2018_anncyc.nc";ncl_lev=2;title2="ERA5 $climobs";export maxplot=30.;export minplot=-30.;delta=10.;units_from_here=1;export maxplotdiff=10;export minplotdiff=-10;deltadiff=2.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;;
-   U200)varobs=U;units="m/s";obsfile="$dir_obs1/ERA5_1m_clim_1deg_1979-2018_prlev.nc";ncl_lev=1;title2="ERA5 $climobs";export maxplot=30.;export minplot=-30.;delta=10.;units_from_here=1;export maxplotdiff=10;export minplotdiff=-10;deltadiff=2.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;;
-   U700)varobs=var131;units="m/s";obsfile="$dir_obs4/uplev_era5_1979-2018_anncyc.nc";ncl_lev=4;title2="ERA5 $climobs";export maxplot=30.;export minplot=-30.;delta=10.;units_from_here=1;export maxplotdiff=10;export minplotdiff=-10;deltadiff=2.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;;
-   U925)varobs=var131;units="m/s";obsfile="$dir_obs4/ua_ERA5_1m_clim_${climobs}.nc";ncl_lev=9;title2="ERA5 $climobs";export maxplot=30.;export minplot=-30.;delta=10.;units_from_here=1;export maxplotdiff=10;export minplotdiff=-10;deltadiff=2.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;;
-   Z010)varobs=var129;cf=0;units="m";obsfile="$dir_obs4/Zplev_era5_1979-2018_anncyc.nc";ncl_lev=1;title2="ERA5 $climobs";export maxplot=31600.;export minplot=28800;delta=100;units_from_here=1;export maxplotdiff=200;export minplotdiff=-200;deltadiff=20.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;;
-   Z100)varobs=var129;cf=0;units="m";obsfile="$dir_obs4/Zplev_era5_1979-2018_anncyc.nc";ncl_lev=2;title2="ERA5 $climobs";export maxplot=16800.;export minplot=15000;delta=100;units_from_here=1;export maxplotdiff=200;export minplotdiff=-200;deltadiff=20.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;;
-#   Z500)varobs=Z;cf=0;units="m";obsfile="$dir_obs1/ERA5_1m_clim_1deg_1979-2018_prlev.nc";ncl_lev=3;title2="ERA5 $climobs";export maxplot=5900.;export minplot=4800;delta=100;units_from_here=1;export maxplotdiff=50;export minplotdiff=-50;deltadiff=5.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;;
-   Z500)varobs=var129;units="m";obsfile="$dir_obs1/zg_ERA5_1m_clim_${climobs}.nc";ncl_lev=6;title2="ERA5 $climobs";export maxplot=5900.;export minplot=4800;delta=100;units_from_here=1;export maxplotdiff=50;export minplotdiff=-50;deltadiff=5.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;title="Geopotential height at 500hPa";name_from_here=1;;
-   Z700)varobs=var129;cf=0;units="m";obsfile="$dir_obs4/zg_ERA5_1m_clim_${climobs}.nc";ncl_lev=7;title2="ERA5 $climobs";export maxplot=3200.;export minplot=2600;delta=100;units_from_here=1;export maxplotdiff=100;export minplotdiff=-100;deltadiff=20.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;title="Geopotential height at 700hPa";name_from_here=1;;
-   Z850)varobs=var129;cf=0;units="m";obsfile="$dir_obs1/zg_ERA5_1m_clim_${climobs}.nc";ncl_lev=8;title2="ERA5 $climobs";export maxplot=1550.;export minplot=1050.;delta=50;units_from_here=1;export maxplotdiff=50.;export minplotdiff=-50;deltadiff=5.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;title="Geopotential height at 850hPa";name_from_here=1;;
-   TS)varobs=var235;cf=-273.15;units="Celsius deg";obsfile="$dir_obs1/sst_HadISST_1m_clim_1993-2016.nc";export title2="ERA5 $climobs";export maxplot=36;export minplot=-20;delta=4;units_from_here=1;export cmp2obs_ncl=$cmp2obs;;
-   PRECT)varobs=precip;mf=86400000;units="mm/d";export maxplot=18;export minplot=2;delta=2.;export maxplotdiff=5.;export minplotdiff=-5.;deltadiff=1.;obsfile="$dir_obs1/precip_GPCP_1m_clim_1993-2016.nc";export title2="GPCP $climobs";title="Total precipitation";units_from_here=1;name_from_here=1;export cmp2obs_ncl=$cmp2obs;;
+   TREFHT)varobs=var167;cf=-273.15;title="2m Temperature";units="Celsius deg";obsfile="$dir_obs2/ERA5_1m_clim_C3S_t2m_${climobs}.nc";title2="ERA5 $climobs";export maxplot=36;export minplot=-20;delta=4;units_from_here=1;export cmp2obs_ncl=$cmp2obs;;
+   U010)varobs=var131;units="m/s";obsfile="$dir_obs4/uplev_era5_1979-2018_anncyc.nc";ncl_lev=1;title2="ERA5 $climobs";export maxplot=30.;export minplot=-30.;delta=10.;units_from_here=1;export maxplotdiff=10;export minplotdiff=-10;deltadiff=2.;cmp2obs_anncyc=1;export cmp2obs_ncl=$cmp2obs;title="Zonal wind at 10Pa";name_from_here=1;;
+   U100)varobs=var131;units="m/s";obsfile="$dir_obs2/ERA5_1m_clim_C3S_ua_${climobs}.nc";ncl_lev=4;title2="ERA5 $climobs";export maxplot=30.;export minplot=-30.;delta=10.;units_from_here=1;export maxplotdiff=10;export minplotdiff=-10;deltadiff=2.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;title="Zonal wind at 100Pa";name_from_here=1;;
+   U200)varobs=var131;units="m/s";obsfile="$dir_obs2/ERA5_1m_clim_C3S_ua_${climobs}.nc";ncl_lev=5;title2="ERA5 $climobs";export maxplot=30.;export minplot=-30.;delta=10.;units_from_here=1;export maxplotdiff=10;export minplotdiff=-10;deltadiff=2.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;title="Zonal wind at 200Pa";name_from_here=1;;
+   U700)varobs=var131;units="m/s";obsfile="$dir_obs2/ERA5_1m_clim_C3S_ua_${climobs}.nc";ncl_lev=10;title2="ERA5 $climobs";export maxplot=30.;export minplot=-30.;delta=10.;units_from_here=1;export maxplotdiff=10;export minplotdiff=-10;deltadiff=2.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;title="Zonal wind at 700Pa";name_from_here=1;;
+   U925)varobs=var131;units="m/s";obsfile="$dir_obs2/ERA5_1m_clim_C3S_ua_${climobs}.nc";ncl_lev=12;title2="ERA5 $climobs";export maxplot=15.;export minplot=-15.;delta=2.5;units_from_here=1;export maxplotdiff=5;export minplotdiff=-5;deltadiff=1.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;title="Zonal wind at 925Pa";name_from_here=1;;
+   Z010)varobs=var129;cf=0;units="m";obsfile="$dir_obs2/ERA5_1m_clim_C3S_zg_${climobs}.nc";ncl_lev=0;title2="ERA5 $climobs";export maxplot=31600.;export minplot=28800;delta=100;units_from_here=1;export maxplotdiff=200;export minplotdiff=-200;deltadiff=20.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;;
+   Z100)varobs=var129;cf=0;units="m";obsfile="$dir_obs2/ERA5_1m_clim_C3S_zg_${climobs}.nc";ncl_lev=4;title2="ERA5 $climobs";export maxplot=16800.;export minplot=15000;delta=100;units_from_here=1;export maxplotdiff=200;export minplotdiff=-200;deltadiff=20.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;;
+   Z500)varobs=var129;units="m";obsfile="$dir_obs2/ERA5_1m_clim_C3S_zg_${climobs}.nc";ncl_lev=9;title2="ERA5 $climobs";export maxplot=5900.;export minplot=5000;delta=100;units_from_here=1;export maxplotdiff=80;export minplotdiff=-80;deltadiff=10.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;title="Geopotential height at 500hPa";name_from_here=1;;
+   Z700)varobs=var129;cf=0;units="m";obsfile="$dir_obs2/ERA5_1m_clim_C3S_zg_${climobs}.nc";ncl_lev=10;title2="ERA5 $climobs";export maxplot=3200.;export minplot=2600;delta=100;units_from_here=1;export maxplotdiff=100;export minplotdiff=-100;deltadiff=20.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;title="Geopotential height at 700hPa";name_from_here=1;;
+   Z850)varobs=var129;cf=0;units="m";obsfile="$dir_obs2/ERA5_1m_clim_C3S_zg_${climobs}.nc";ncl_lev=11;title2="ERA5 $climobs";export maxplot=1550.;export minplot=1050.;delta=50;units_from_here=1;export maxplotdiff=50.;export minplotdiff=-50;deltadiff=5.;cmp2obs_anncyc=0;export cmp2obs_ncl=$cmp2obs;title="Geopotential height at 850hPa";name_from_here=1;;
+   TS)varobs=var235;cf=-273.15;units="Celsius deg";obsfile="$dir_obs1/sst_HadISST_1m_clim_${climobs}.nc";export title2="ERA5 $climobs";export maxplot=36;export minplot=-20;delta=4;units_from_here=1;export cmp2obs_ncl=$cmp2obs;;
+   PRECT)varobs=precip;mf=86400000;units="mm/d";export maxplot=18;export minplot=2;delta=2.;export maxplotdiff=5.;export minplotdiff=-5.;deltadiff=1.;obsfile="$dir_obs1/precip_GPCP_1m_clim_${climobs}.nc";export title2="GPCP $climobs";title="Total precipitation";units_from_here=1;name_from_here=1;export cmp2obs_ncl=$cmp2obs;;
    PRECC)varobs=var167;mf=86400000;units="mm/d";export maxplot=18;export minplot=2;delta=2.;title="Convective precipitation";units_from_here=1;name_from_here=1;cmp2obs_ncl=0;cmp2obs_anncyc=0;;
-   PSL)varobs=var151;mf=0.01;units="hPa";export maxplot=1030;export minplot=990;delta=4.;export maxplotdiff=8;export minplotdiff=-8;deltadiff=2.;obsfile="$dir_obs1/mslp_ERA5_1m_clim_1993-2016.nc";export cmp2obs_ncl=$cmp2obs;;
+   PSL)varobs=var151;mf=0.01;units="hPa";export maxplot=1030;export minplot=990;delta=4.;export maxplotdiff=8;export minplotdiff=-8;deltadiff=2.;obsfile="$dir_obs2/ERA5_1m_clim_C3S_mslp_${climobs}.nc";export cmp2obs_ncl=$cmp2obs;;
    QFLX)varobs=var167;mf=1000000;units="10^-6 kgm-2s-1";export maxplot=100.;export minplot=0.;delta=10.;title="Surface Water Flux";units_from_here=1;name_from_here=1;cmp2obs_ncl=0;export maxplotdiff=10.;export minplotdiff=-10.;deltadiff=1.;;
    SOLIN)varobs=var167;units="W/m2";export maxplot=450;export minplot=60;delta=30.;title="Insolation";units_from_here=1;name_from_here=1;cmp2obs_ncl=0;cmp2obs_anncyc=0;axplotdiff=0.00005;export minplotdiff=-0.00005;deltadiff=.00001;;
    FLDS)varobs=var175;export maxplot=400;export minplot=100;delta=50.;name_from_here=1;title="Down lw surface";export maxplotdiff=20;export minplotdiff=-20;deltadiff=5.;obsfile="$dir_obs3/strd_era5_1980-2019_mm_ann_cyc.nc";export title2="ERA5 $climobs";export cmp2obs_ncl=$cmp2obs;;
